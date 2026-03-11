@@ -3,10 +3,6 @@
   "version": "1.0.0",
   "description": "JusticeChain - Platform for justice system transparency and accountability",
   "private": true,
-  "workspaces": [
-    "africajustice-backend",
-    "africajustice-frontend"
-  ],
   "scripts": {
     "install:all": "npm install && npm --prefix africajustice-backend install && npm --prefix africajustice-frontend install",
     "dev": "npm run dev --prefix africajustice-frontend",
@@ -41,8 +37,8 @@
   "author": "JusticeChain Team",
   "license": "MIT",
   "engines": {
-    "node": ">=18.0.0",
-    "npm": ">=9.0.0"
+    "node": "20.x",
+    "npm": ">=10.2.0"
   },
   "dependencies": {
     "@sendgrid/mail": "^8.1.6"
