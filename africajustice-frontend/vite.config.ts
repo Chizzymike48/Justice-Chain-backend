@@ -1,10 +1,27 @@
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 import { defineConfig as defineVitestConfig } from 'vitest/config'
+import path from 'path'
 
 // https://vite.dev/config/
 export default defineConfig({
   plugins: [react()],
+  resolve: {
+    alias: {
+      '@': path.resolve(__dirname, './src'),
+    },
+  },
+  // Vercel-specific build options
+  build: {
+    sourcemap: false,
+    minify: 'esbuild',
+  },
+  // Ensure proper base path for Vercel
+  base: '/',
+  server: {
+    port: 5173,
+    host: true,
+  },
   test: {
     globals: true,
     environment: 'jsdom',
