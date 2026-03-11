@@ -1,0 +1,234 @@
+name: Backend CI/CD
+
+on:
+  push:
+    branches: [main, develop]
+    paths:
+      - 'africajustice-backend/src/**'
+      - 'africajustice-backend/tests/**'
+      - 'africajustice-backend/package.json'
+      - 'africajustice-backend/tsconfig.json'
+      - '.github/workflows/backend.yml'
+  pull_request:
+    branches: [main, develop]
+    paths:
+      - 'africajustice-backend/src/**'
+      - 'africajustice-backend/tests/**'
+      - 'africajustice-backend/package.json'
+      - 'africajustice-backend/tsconfig.json'
+
+jobs:
+  lint:
+    name: Lint & Type Check
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+          cache: 'npm'
+          cache-dependency-path: africajustice-backend/package-lock.json
+
+      - name: Install dependencies
+        working-directory: africajustice-backend
+        run: npm ci
+
+      - name: Run ESLint
+        working-directory: africajustice-backend
+        run: npm run lint
+
+      - name: TypeScript type check
+        working-directory: africajustice-backend
+        run: npm run type-check
+
+  security:
+    name: Security Audit
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+          cache: 'npm'
+          cache-dependency-path: africajustice-backend/package-lock.json
+
+      - name: Install dependencies
+        working-directory: africajustice-backend
+        run: npm ci
+
+      - name: Run npm audit
+        working-directory: africajustice-backend
+        run: npm audit --audit-level=moderate
+        continue-on-error: true
+
+  test:
+    name: Unit & Integration Tests
+    runs-on: ubuntu-latest
+    needs: lint
+    services:
+      mongodb:
+        image: mongo:5
+        options: >-
+          --health-cmd "mongosh --eval \"db.adminCommand('ping')\"" 
+          --health-interval 10s 
+          --health-timeout 5s 
+          --health-retries 5
+        ports:
+          - 27017:27017
+      redis:
+        image: redis:7
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 6379:6379
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+          cache: 'npm'
+          cache-dependency-path: africajustice-backend/package-lock.json
+
+      - name: Install dependencies
+        working-directory: africajustice-backend
+        run: npm ci
+
+      - name: Run tests with coverage
+        working-directory: africajustice-backend
+        run: npm test -- --coverage --runInBand
+        env:
+          MONGODB_URI: mongodb://localhost:27017/justicechain-test
+          REDIS_HOST: localhost
+          REDIS_PORT: 6379
+          JWT_SECRET: test-secret-key
+          NODE_ENV: test
+
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v3
+        with:
+          files: ./africajustice-backend/coverage/coverage-final.json
+          flags: backend
+          name: backend-coverage
+          fail_ci_if_error: false
+
+      - name: Archive test results
+        if: failure()
+        uses: actions/upload-artifact@v3
+        with:
+          name: test-results
+          path: africajustice-backend/coverage/
+          retention-days: 7
+
+  build:
+    name: Build Backend
+    runs-on: ubuntu-latest
+    needs: [lint, test]
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+          cache: 'npm'
+          cache-dependency-path: africajustice-backend/package-lock.json
+
+      - name: Install dependencies
+        working-directory: africajustice-backend
+        run: npm ci
+
+      - name: Build TypeScript
+        working-directory: africajustice-backend
+        run: npm run build
+
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: backend-build
+          path: africajustice-backend/dist/
+          retention-days: 7
+
+  docker:
+    name: Build Docker Image
+    runs-on: ubuntu-latest
+    needs: build
+    if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/develop')
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+        if: secrets.DOCKER_USERNAME != ''
+
+      - name: Extract branch name
+        shell: bash
+        run: echo "branch=${GITHUB_REF#refs/heads/}" >> $GITHUB_OUTPUT
+        id: extract_branch
+
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v4
+        with:
+          context: africajustice-backend
+          push: ${{ secrets.DOCKER_USERNAME != '' }}
+          tags: |
+            ${{ secrets.DOCKER_USERNAME }}/justicechain-backend:${{ steps.extract_branch.outputs.branch }}
+            ${{ secrets.DOCKER_USERNAME }}/justicechain-backend:latest
+          cache-from: type=registry,ref=${{ secrets.DOCKER_USERNAME }}/justicechain-backend:buildcache
+          cache-to: type=registry,ref=${{ secrets.DOCKER_USERNAME }}/justicechain-backend:buildcache,mode=max
+        if: secrets.DOCKER_USERNAME != ''
+
+  notify:
+    name: Notify Results
+    runs-on: ubuntu-latest
+    needs: [lint, security, test, build, docker]
+    if: always()
+    steps:
+      - name: Check results
+        run: |
+          if [ "${{ needs.lint.result }}" = "failure" ] || [ "${{ needs.test.result }}" = "failure" ] || [ "${{ needs.build.result }}" = "failure" ]; then
+            echo "❌ Backend CI/CD failed"
+            exit 1
+          fi
+          echo "✅ Backend CI/CD passed"
+
+      - name: Comment PR with results
+        if: github.event_name == 'pull_request' && always()
+        uses: actions/github-script@v6
+        with:
+          script: |
+            const lint = '${{ needs.lint.result }}';
+            const security = '${{ needs.security.result }}';
+            const test = '${{ needs.test.result }}';
+            const build = '${{ needs.build.result }}';
+            const docker = '${{ needs.docker.result }}';
+            
+            const status = lint === 'failure' || test === 'failure' || build === 'failure' ? '❌' : '✅';
+            const message = `${status} **Backend CI/CD Results**
+            
+            - Lint: ${lint === 'success' ? '✅' : '❌'}
+            - Security: ${security === 'success' ? '✅' : '⚠️'}
+            - Tests: ${test === 'success' ? '✅' : '❌'}
+            - Build: ${build === 'success' ? '✅' : '❌'}
+            - Docker: ${docker === 'success' || docker === 'skipped' ? '✅' : '❌'}`;
+            
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: message
+            });

@@ -1,0 +1,323 @@
+/* Onboarding Tutorial Styles */
+
+.onboarding-container {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 2000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.onboarding-container.centered {
+  background: rgba(0, 0, 0, 0.4);
+}
+
+.onboarding-container.has-highlight {
+  background: rgba(0, 0, 0, 0.7);
+}
+
+/* Spotlight Effect */
+.onboarding-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.7);
+  z-index: 1998;
+}
+
+.onboarding-spotlight {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 1999;
+  pointer-events: none;
+}
+
+/* Tutorial Card */
+.onboarding-card {
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+  z-index: 2001;
+  max-width: 480px;
+  width: 90%;
+  max-height: 90vh;
+  display: flex;
+  flex-direction: column;
+  animation: popIn 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+}
+
+@keyframes popIn {
+  from {
+    opacity: 0;
+    transform: scale(0.8);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* Header */
+.onboarding-header {
+  padding: 1.5rem;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.onboarding-progress {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.progress-text {
+  font-size: 0.9rem;
+  color: #666;
+  white-space: nowrap;
+}
+
+.progress-bar {
+  flex: 1;
+  height: 4px;
+  background: #eee;
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+  transition: width 0.3s ease;
+}
+
+.onboarding-close {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  background: none;
+  border: none;
+  color: #999;
+  cursor: pointer;
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  transition: all 0.2s ease;
+  padding: 0;
+}
+
+.onboarding-close:hover {
+  background: #f0f0f0;
+  color: #333;
+}
+
+/* Content */
+.onboarding-content {
+  flex: 1;
+  padding: 2rem 1.5rem;
+  overflow-y: auto;
+}
+
+.onboarding-content h2 {
+  margin: 0 0 1rem 0;
+  color: #1a1a1a;
+  font-size: 1.5rem;
+}
+
+.onboarding-content p {
+  margin: 0 0 1.5rem 0;
+  color: #666;
+  line-height: 1.6;
+  font-size: 0.95rem;
+}
+
+/* Tips */
+.onboarding-tips {
+  display: flex;
+  flex-direction: column;
+  gap: 0.8rem;
+  margin-top: 1.5rem;
+}
+
+.onboarding-tip {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.8rem;
+  padding: 0.8rem;
+  background: #f5f7fa;
+  border-radius: 6px;
+  color: #333;
+  font-size: 0.9rem;
+  line-height: 1.4;
+}
+
+.onboarding-tip svg {
+  min-width: 16px;
+  margin-top: 2px;
+  color: #4caf50;
+  flex-shrink: 0;
+}
+
+/* Actions */
+.onboarding-actions {
+  display: flex;
+  gap: 1rem;
+  padding: 1.5rem;
+  border-top: 1px solid #f0f0f0;
+}
+
+.btn-primary,
+.btn-secondary {
+  flex: 1;
+  padding: 0.8rem 1rem;
+  border: none;
+  border-radius: 6px;
+  font-weight: 500;
+  cursor: pointer;
+  font-size: 0.95rem;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+}
+
+.btn-primary {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+}
+
+.btn-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+}
+
+.btn-secondary {
+  background: #f0f0f0;
+  color: #333;
+}
+
+.btn-secondary:hover {
+  background: #e0e0e0;
+}
+
+/* Step Indicators */
+.onboarding-dots {
+  display: flex;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0 1.5rem 1.5rem;
+}
+
+.dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #ddd;
+  border: none;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  padding: 0;
+}
+
+.dot.active {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  width: 24px;
+  border-radius: 4px;
+}
+
+.dot.completed {
+  background: #4caf50;
+}
+
+.dot:hover {
+  transform: scale(1.2);
+}
+
+/* Step-specific positioning */
+.step-welcome {
+  /* Centered */
+}
+
+.step-dashboard {
+  margin-bottom: 20vh;
+}
+
+.step-report {
+  margin-top: 15vh;
+}
+
+.step-livestream {
+  margin-bottom: 25vh;
+}
+
+.step-verify {
+  margin-top: 10vh;
+}
+
+.step-projects {
+  margin-bottom: 15vh;
+}
+
+.step-complete {
+  /* Centered */
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .onboarding-card {
+    max-width: 95%;
+    max-height: 85vh;
+  }
+
+  .onboarding-content {
+    padding: 1.5rem 1rem;
+  }
+
+  .onboarding-content h2 {
+    font-size: 1.3rem;
+  }
+
+  .onboarding-content p {
+    font-size: 0.9rem;
+  }
+
+  .onboarding-actions {
+    flex-direction: column;
+    padding: 1rem;
+  }
+
+  .btn-primary,
+  .btn-secondary {
+    width: 100%;
+  }
+}
+
+/* Scrollbar styling for content area */
+.onboarding-content::-webkit-scrollbar {
+  width: 6px;
+}
+
+.onboarding-content::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 3px;
+}
+
+.onboarding-content::-webkit-scrollbar-thumb {
+  background: #ccc;
+  border-radius: 3px;
+}
+
+.onboarding-content::-webkit-scrollbar-thumb:hover {
+  background: #999;
+}

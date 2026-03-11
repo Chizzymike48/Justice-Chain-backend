@@ -1,0 +1,50 @@
+{
+  "name": "justicechain",
+  "version": "1.0.0",
+  "description": "JusticeChain - Platform for justice system transparency and accountability",
+  "private": true,
+  "workspaces": [
+    "africajustice-backend",
+    "africajustice-frontend"
+  ],
+  "scripts": {
+    "install:all": "npm install && npm --prefix africajustice-backend install && npm --prefix africajustice-frontend install",
+    "dev": "npm run dev --prefix africajustice-frontend",
+    "dev:backend": "npm run dev --prefix africajustice-backend",
+    "dev:frontend": "npm run dev --prefix africajustice-frontend",
+    "dev:both": "npm run dev:backend & npm run dev:frontend",
+    "build": "npm run build --prefix africajustice-frontend && npm run build --prefix africajustice-backend",
+    "build:frontend": "npm run build --prefix africajustice-frontend",
+    "build:backend": "npm run build --prefix africajustice-backend",
+    "lint": "npm run lint --prefix africajustice-frontend && npm run lint --prefix africajustice-backend",
+    "lint:frontend": "npm run lint --prefix africajustice-frontend",
+    "lint:backend": "npm run lint --prefix africajustice-backend",
+    "type-check": "npm run type-check --prefix africajustice-frontend && npm run type-check --prefix africajustice-backend",
+    "type-check:frontend": "npm run type-check --prefix africajustice-frontend",
+    "type-check:backend": "npm run type-check --prefix africajustice-backend",
+    "test": "npm run test --prefix africajustice-frontend && npm run test --prefix africajustice-backend",
+    "test:frontend": "npm run test --prefix africajustice-frontend",
+    "test:backend": "npm run test --prefix africajustice-backend",
+    "test:coverage": "npm run test:coverage --prefix africajustice-frontend && npm run test --prefix africajustice-backend -- --coverage",
+    "e2e": "npm run e2e --prefix africajustice-frontend",
+    "e2e:run": "npm run e2e:run --prefix africajustice-frontend",
+    "start": "npm start --prefix africajustice-backend",
+    "preview": "npm run preview --prefix africajustice-frontend"
+  },
+  "keywords": [
+    "justice",
+    "transparency",
+    "accountability",
+    "corruption",
+    "verification"
+  ],
+  "author": "JusticeChain Team",
+  "license": "MIT",
+  "engines": {
+    "node": ">=18.0.0",
+    "npm": ">=9.0.0"
+  },
+  "dependencies": {
+    "@sendgrid/mail": "^8.1.6"
+  }
+}
