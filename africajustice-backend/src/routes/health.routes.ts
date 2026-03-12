@@ -1,5 +1,6 @@
 import { Router, Request, Response } from 'express'
-import { connectRedis, getFromCache } from '../config/redis'
+import mongoose from 'mongoose'
+import { getRedisClient } from '../config/redis'
 
 const router = Router()
 
@@ -21,31 +22,65 @@ router.get('/health', async (req: Request, res: Response) => {
       },
     }
 
+    const withTimeout = async <T>(promise: Promise<T>, ms: number, label: string): Promise<T> => {
+      return await new Promise<T>((resolve, reject) => {
+        const timer = setTimeout(() => reject(new Error(`${label} timeout`)), ms)
+        promise
+          .then((value) => {
+            clearTimeout(timer)
+            resolve(value)
+          })
+          .catch((error) => {
+            clearTimeout(timer)
+            reject(error)
+          })
+      })
+    }
+
     // Check Node.js memory
     const memUsage = process.memoryUsage()
     health.services.memory = memUsage.heapUsed / memUsage.heapTotal < 0.9 ? 'UP' : 'WARNING'
 
     // Check MongoDB connection
     try {
-      // Try to get a response from database
-      health.services.mongodb = 'UP'
+      if (process.env.ENABLE_MONGO === 'false') {
+        health.services.mongodb = 'DISABLED'
+      } else if (mongoose.connection.readyState !== 1 || !mongoose.connection.db) {
+        health.services.mongodb = 'DOWN'
+      } else {
+        await withTimeout(mongoose.connection.db.admin().ping(), 2000, 'MongoDB')
+        health.services.mongodb = 'UP'
+      }
     } catch (error) {
       health.services.mongodb = 'DOWN'
     }
 
     // Check Redis connection
     try {
-      const redisTest = await getFromCache('health-check')
-      health.services.redis = redisTest !== null ? 'UP' : 'DEGRADED'
+      if (process.env.ENABLE_REDIS === 'false') {
+        health.services.redis = 'DISABLED'
+      } else {
+        const redisClient = getRedisClient()
+        if (!redisClient || !redisClient.isReady) {
+          health.services.redis = 'DOWN'
+        } else {
+          await withTimeout(redisClient.ping(), 2000, 'Redis')
+          health.services.redis = 'UP'
+        }
+      }
     } catch (error) {
       health.services.redis = 'DOWN'
     }
 
     // Overall status
-    const allServicesUp = Object.values(health.services).every(s => s === 'UP')
-    health.status = allServicesUp ? 'UP' : 'DEGRADED'
+    const statuses = Object.values(health.services)
+    const hasDown = statuses.includes('DOWN')
+    const hasWarning = statuses.includes('WARNING')
+    const hasUnknown = statuses.includes('UNKNOWN')
+    const allServicesHealthy = !hasDown && !hasWarning && !hasUnknown
+    health.status = allServicesHealthy ? 'UP' : 'DEGRADED'
 
-    const statusCode = allServicesUp ? 200 : 503
+    const statusCode = allServicesHealthy ? 200 : 503
     res.status(statusCode).json(health)
   } catch (error) {
     res.status(503).json({
@@ -62,12 +97,18 @@ router.get('/health', async (req: Request, res: Response) => {
  */
 router.get('/ready', async (req: Request, res: Response) => {
   try {
-    // Check if services are initialized
+    const mongoEnabled = process.env.ENABLE_MONGO !== 'false'
+    const redisEnabled = process.env.ENABLE_REDIS !== 'false'
+
+    const mongoReady = !mongoEnabled || (mongoose.connection.readyState === 1 && !!mongoose.connection.db)
+    const redisClient = getRedisClient()
+    const redisReady = !redisEnabled || (!!redisClient && redisClient.isReady)
+
     const isReady = {
-      ready: true,
+      ready: mongoReady && redisReady,
       services: {
-        mongodb: true,
-        redis: true,
+        mongodb: mongoReady,
+        redis: redisReady,
       },
       timestamp: new Date().toISOString(),
     }

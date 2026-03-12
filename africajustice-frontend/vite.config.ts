@@ -1,6 +1,5 @@
-import { defineConfig } from 'vite'
+import { defineConfig } from 'vitest/config'
 import react from '@vitejs/plugin-react'
-import { defineConfig as defineVitestConfig } from 'vitest/config'
 import path from 'path'
 
 // https://vite.dev/config/

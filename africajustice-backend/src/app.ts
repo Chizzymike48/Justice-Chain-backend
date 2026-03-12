@@ -5,14 +5,16 @@ import helmet from 'helmet'
 import compression from 'compression'
 import morgan from 'morgan'
 import cookieParser from 'cookie-parser'
+import mongoose from 'mongoose'
 import validateEnv from './config/validateEnv'
 import connectDB from './config/database'
-import { connectRedis } from './config/redis'
+import { connectRedis, getRedisClient } from './config/redis'
 import { initializeSentry, setupSentryMiddleware, setupSentryErrorHandler } from './config/sentry'
 import errorHandler from './middleware/errorHandler'
 import { generalLimiter } from './middleware/rateLimit'
 import { setupSwagger } from './config/swagger'
 import authRoutes from './routes/auth.routes'
+import healthRoutes from './routes/health.routes'
 import reportRoutes from './routes/reports.routes'
 import verifyRoutes from './routes/verify.routes'
 import officialsRoutes from './routes/officials.routes'
@@ -48,6 +50,24 @@ if (process.env.NODE_ENV !== 'test') {
     console.warn('Redis connection failed, continuing without cache')
   )
   initializeSentry()
+
+  // Log startup readiness after initial connection attempts
+  setTimeout(() => {
+    const mongoEnabled = process.env.ENABLE_MONGO !== 'false'
+    const redisEnabled = process.env.ENABLE_REDIS !== 'false'
+    const mongoStatus = !mongoEnabled
+      ? 'DISABLED'
+      : mongoose.connection.readyState === 1
+        ? 'UP'
+        : 'DOWN'
+    const redisClient = getRedisClient()
+    const redisStatus = !redisEnabled
+      ? 'DISABLED'
+      : redisClient && redisClient.isReady
+        ? 'UP'
+        : 'DOWN'
+    console.log(`[startup] MongoDB: ${mongoStatus} | Redis: ${redisStatus}`)
+  }, 3000)
 }
 
 // Sentry request handler (should be first)
@@ -71,6 +91,9 @@ if (process.env.NODE_ENV === 'development') {
 
 // Setup Swagger API documentation
 setupSwagger(app)
+
+// Health and readiness endpoints
+app.use('/', healthRoutes)
 
 app.use('/api/', generalLimiter)
 
