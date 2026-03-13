@@ -17,3 +17,7 @@ services:
         value: "false"
       - key: PORT
         value: 5000
+      - key: RECORDINGS_DIR
+        value: /data/recordings
+      - key: THUMBNAILS_DIR
+        value: /data/thumbnails

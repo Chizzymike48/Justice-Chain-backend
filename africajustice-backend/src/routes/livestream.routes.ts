@@ -1,4 +1,5 @@
 import { Request, Response, Router } from 'express'
+import mongoose from 'mongoose'
 import { authMiddleware } from '../middleware/auth'
 import type { AuthRequest } from '../types'
 import { auditWriteAction } from '../middleware/audit'
@@ -9,6 +10,13 @@ import livestreamService from '../services/livestreamService'
 import recordingService from '../services/recordingService'
 
 const router = Router()
+
+const findStreamByIdentifier = async (id: string) => {
+  if (mongoose.Types.ObjectId.isValid(id)) {
+    return LiveStream.findOne({ $or: [{ _id: id }, { streamId: id }] })
+  }
+  return LiveStream.findOne({ streamId: id })
+}
 
 // Get all livestreams
 router.get('/', async (_req: Request, res: Response) => {
@@ -108,18 +116,19 @@ router.post(
 // Get livestream by ID
 router.get('/:id', async (req: Request, res: Response): Promise<unknown> => {
   try {
-    const stream = await LiveStream.findById(req.params.id)
+    const stream = await findStreamByIdentifier(req.params.id)
     if (!stream) {
       return res.status(404).json({
         success: false,
         message: 'Livestream not found.',
       })
     }
+    const sessionKey = stream.streamId || stream.id
     return res.json({
       success: true,
       data: {
         ...stream.toJSON(),
-        viewerCount: livestreamService.getViewerCount(stream.id),
+        viewerCount: livestreamService.getViewerCount(sessionKey),
       },
     })
   } catch (error) {
@@ -138,7 +147,7 @@ router.patch(
   async (req: AuthRequest, res: Response): Promise<unknown> => {
     try {
       const { status } = req.body as { status?: string }
-      const stream = await LiveStream.findById(req.params.id)
+      const stream = await findStreamByIdentifier(req.params.id)
 
       if (!stream) {
         return res.status(404).json({
@@ -160,16 +169,17 @@ router.patch(
         await stream.save()
 
         // Update session status
-        livestreamService.updateStreamStatus(stream.id, status as 'active' | 'stopped')
+        const sessionKey = stream.streamId || stream.id
+        livestreamService.updateStreamStatus(sessionKey, status as 'active' | 'stopped')
 
         // Create recording if stream is stopped
         if (status === 'stopped') {
-          const session = livestreamService.getStreamSession(stream.id)
+          const session = livestreamService.getStreamSession(sessionKey)
           if (session) {
-            const duration = livestreamService.getStreamDuration(stream.id)
+            const duration = livestreamService.getStreamDuration(sessionKey)
             try {
               await recordingService.createRecording({
-                streamId: stream.id,
+                streamId: sessionKey,
                 title: stream.title,
                 userId: stream.userId || '',
                 duration,
@@ -192,11 +202,12 @@ router.patch(
         }
       }
 
+      const responseSessionKey = stream.streamId || stream.id
       return res.json({
         success: true,
         data: {
           ...stream.toJSON(),
-          viewerCount: livestreamService.getViewerCount(stream.id),
+          viewerCount: livestreamService.getViewerCount(responseSessionKey),
         },
       })
     } catch (error) {

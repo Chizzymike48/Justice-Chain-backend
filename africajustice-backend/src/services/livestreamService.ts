@@ -20,8 +20,14 @@ export interface StreamSession {
 }
 
 const activeSessions = new Map<string, StreamSession>()
-const RECORDING_DIR = path.join(process.cwd(), 'recordings')
-const THUMBNAILS_DIR = path.join(process.cwd(), 'thumbnails')
+const resolveDir = (value: string | undefined, fallback: string): string => {
+  const trimmed = value?.trim()
+  return trimmed ? path.resolve(trimmed) : fallback
+}
+const RECORDING_DIR = resolveDir(process.env.RECORDINGS_DIR, path.join(process.cwd(), 'recordings'))
+const THUMBNAILS_DIR = resolveDir(process.env.THUMBNAILS_DIR, path.join(process.cwd(), 'thumbnails'))
+const RECORDING_PUBLIC_BASE = (process.env.RECORDINGS_PUBLIC_BASE || '/recordings').replace(/\/+$/, '')
+const THUMBNAILS_PUBLIC_BASE = (process.env.THUMBNAILS_PUBLIC_BASE || '/thumbnails').replace(/\/+$/, '')
 
 // Ensure directories exist
 const ensureDirectories = () => {
@@ -210,14 +216,15 @@ const saveStreamRecording = (streamId: string): void => {
 
   try {
     const recordingId = generateRecordingId(streamId)
-    const recordingPath = path.join(RECORDING_DIR, `${recordingId}.webm`)
+    const recordingFilePath = path.join(RECORDING_DIR, `${recordingId}.webm`)
+    const recordingPublicPath = `${RECORDING_PUBLIC_BASE}/${recordingId}.webm`
 
     // Concatenate all chunks
     const combinedBuffer = Buffer.concat(session.recordingBuffer)
-    fs.writeFileSync(recordingPath, combinedBuffer)
+    fs.writeFileSync(recordingFilePath, combinedBuffer)
 
-    session.recordingPath = recordingPath
-    console.log(`Stream recording saved: ${recordingPath}`)
+    session.recordingPath = recordingPublicPath
+    console.log(`Stream recording saved: ${recordingFilePath}`)
 
     // Generate thumbnail (extract first frame)
     generateThumbnail(streamId, recordingId)
@@ -228,15 +235,16 @@ const saveStreamRecording = (streamId: string): void => {
 
 const generateThumbnail = (streamId: string, recordingId: string): void => {
   // This is a placeholder - in production, you'd use ffmpeg to extract first frame
-  const thumbnailPath = path.join(THUMBNAILS_DIR, `${recordingId}.jpg`)
+  const thumbnailFilePath = path.join(THUMBNAILS_DIR, `${recordingId}.jpg`)
+  const thumbnailPublicPath = `${THUMBNAILS_PUBLIC_BASE}/${recordingId}.jpg`
   // Placeholder: create a dummy thumbnail
-  fs.writeFileSync(thumbnailPath, Buffer.from('JPEG_PLACEHOLDER'))
+  fs.writeFileSync(thumbnailFilePath, Buffer.from('JPEG_PLACEHOLDER'))
   
   const session = activeSessions.get(streamId)
   if (session) {
-    session.thumbnailPath = thumbnailPath
+    session.thumbnailPath = thumbnailPublicPath
   }
-  console.log(`Thumbnail generated: ${thumbnailPath}`)
+  console.log(`Thumbnail generated: ${thumbnailFilePath}`)
 }
 
 const recordViewerAnalytics = (streamId: string, action: 'joined' | 'left', ws: WebSocket): void => {

@@ -8,6 +8,25 @@ interface AuthSocket extends Socket {
   streamId?: string
 }
 
+const coerceChunkBuffer = (payload: unknown): Buffer | null => {
+  const raw = (payload as { data?: unknown } | undefined)?.data ?? payload
+  if (!raw) return null
+  if (Buffer.isBuffer(raw)) return raw
+  if (raw instanceof ArrayBuffer) {
+    return Buffer.from(new Uint8Array(raw))
+  }
+  if (ArrayBuffer.isView(raw)) {
+    return Buffer.from(raw.buffer)
+  }
+  if (typeof raw === 'object' && raw && (raw as { type?: string; data?: unknown }).type === 'Buffer') {
+    const data = (raw as { data?: unknown }).data
+    if (Array.isArray(data)) {
+      return Buffer.from(data)
+    }
+  }
+  return null
+}
+
 export const setupLiveStreamHandler = (io: Server): void => {
   const livestreamNamespace = io.of('/livestream')
 
@@ -80,6 +99,10 @@ export const setupLiveStreamHandler = (io: Server): void => {
     socket.on('stream-chunk', (data) => {
       if (session.userId === userId && session.status === 'active') {
         // Only the broadcaster can send stream chunks
+        const chunkBuffer = coerceChunkBuffer(data)
+        if (chunkBuffer) {
+          livestreamService.recordStreamChunk(streamId, chunkBuffer)
+        }
         livestreamNamespace.to(`stream-${streamId}`).emit('stream-chunk', data)
       }
     })
@@ -112,7 +135,7 @@ export const setupLiveStreamHandler = (io: Server): void => {
 
         // Update database
         try {
-          await LiveStream.findByIdAndUpdate(streamId, { status: data.status })
+          await LiveStream.findOneAndUpdate({ streamId }, { status: data.status })
         } catch (error) {
           console.error('Failed to update stream status in DB:', error)
         }

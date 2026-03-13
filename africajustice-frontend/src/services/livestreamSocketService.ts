@@ -35,7 +35,8 @@ class LiveStreamSocketService {
         return
       }
 
-      const socketUrl = resolveSocketOrigin()
+      const socketOrigin = resolveSocketOrigin().replace(/\/+$/, '')
+      const socketUrl = `${socketOrigin}/livestream`
 
       this.socket = io(socketUrl, {
         path: '/socket.io/',

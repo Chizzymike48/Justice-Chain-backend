@@ -1,5 +1,6 @@
 import 'dotenv/config'
 import express, { Express, Request, Response } from 'express'
+import path from 'path'
 import cors from 'cors'
 import helmet from 'helmet'
 import compression from 'compression'
@@ -31,6 +32,12 @@ import exportRoutes from './routes/export.routes'
 import chatRoutes from './routes/chat.routes'
 
 const app: Express = express()
+const recordingsDir = process.env.RECORDINGS_DIR
+  ? path.resolve(process.env.RECORDINGS_DIR)
+  : path.join(process.cwd(), 'recordings')
+const thumbnailsDir = process.env.THUMBNAILS_DIR
+  ? path.resolve(process.env.THUMBNAILS_DIR)
+  : path.join(process.cwd(), 'thumbnails')
 const allowedOrigins = process.env.CORS_ORIGIN
   ? process.env.CORS_ORIGIN.split(',').map((origin) => origin.trim()).filter(Boolean)
   : ['http://localhost:5173', 'http://localhost:3000']
@@ -84,6 +91,8 @@ app.use(express.json({ limit: '10mb' }))
 app.use(express.urlencoded({ extended: true, limit: '10mb' }))
 app.use(cookieParser())
 app.use(compression())
+app.use('/recordings', express.static(recordingsDir))
+app.use('/thumbnails', express.static(thumbnailsDir))
 
 if (process.env.NODE_ENV === 'development') {
   app.use(morgan('dev'))
