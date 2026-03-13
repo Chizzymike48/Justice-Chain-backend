@@ -8,13 +8,7 @@ interface AuthTokenPayload extends JwtPayload {
   role: string
 }
 
-export interface AuthRequest extends Request {
-  user?: {
-    id: string
-    email: string
-    role: string
-  }
-}
+import type { AuthRequest } from '../types';
 
 /**
  * Parse Bearer token from Authorization header

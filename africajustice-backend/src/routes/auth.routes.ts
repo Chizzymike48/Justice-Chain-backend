@@ -1,4 +1,4 @@
-import { Router } from 'express'
+import { Router, Request, Response } from 'express'
 import { authMiddleware } from '../middleware/auth'
 import { auditWriteAction } from '../middleware/audit'
 import { authLimiter } from '../middleware/rateLimit'
@@ -8,7 +8,7 @@ import { registerController, loginController, logoutController, getCurrentUserCo
 
 const router = Router()
 
-router.get('/', (_req, res) => {
+router.get('/', (_req: Request, res: Response) => {
   res.json({ success: true, message: 'Auth routes ready' })
 })
 

@@ -6,7 +6,7 @@ export interface IUser {
   role: string
 }
 
-export interface IAuthRequest extends Request {
+export interface AuthRequest extends Request {
   user?: IUser
 }
 

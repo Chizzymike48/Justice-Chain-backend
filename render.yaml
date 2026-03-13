@@ -3,7 +3,7 @@ services:
     name: justicechain-backend
     runtime: node
     rootDir: africajustice-backend
-    buildCommand: npm install && npm run build
+    buildCommand: npm ci --include=dev && npm run build
     startCommand: npm start
     memoryLimit: 1GB
     disk:

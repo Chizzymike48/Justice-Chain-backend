@@ -1,5 +1,6 @@
 import { Router, Request, Response } from 'express'
-import { AuthRequest, authMiddleware } from '../middleware/auth'
+import { authMiddleware } from '../middleware/auth'
+import type { AuthRequest } from '../types'
 import {
   getDashboardMetricsController,
   getDistrictAnalyticsController,

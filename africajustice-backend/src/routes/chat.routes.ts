@@ -1,5 +1,6 @@
 import express, { type Request, type Response } from 'express';
-import { authenticate as authenticateToken, AuthRequest } from '../middleware/auth';
+import { authenticate as authenticateToken } from '../middleware/auth';
+import type { AuthRequest } from '../types';
 import chatService from '../services/chatService';
 
 const router = express.Router();

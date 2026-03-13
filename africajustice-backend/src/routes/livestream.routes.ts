@@ -1,5 +1,6 @@
 import { Request, Response, Router } from 'express'
-import { AuthRequest, authMiddleware } from '../middleware/auth'
+import { authMiddleware } from '../middleware/auth'
+import type { AuthRequest } from '../types'
 import { auditWriteAction } from '../middleware/audit'
 import { validateRequest } from '../middleware/validation'
 import { createLiveStreamValidator } from '../validators/livestreamValidators'
