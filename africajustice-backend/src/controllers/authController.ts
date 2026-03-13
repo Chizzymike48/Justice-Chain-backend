@@ -104,8 +104,22 @@ export const loginController = async (req: any, res: Response) => {
     }
 
     // Update language if provided in login request
-    if (preferredLanguage) {
+    if (preferredLanguage && user) {
       user = await User.findByIdAndUpdate(user.id, { preferredLanguage }, { new: true })
+      if (!user) {
+        return res.status(500).json({
+          success: false,
+          message: 'Failed to update user language preference.',
+        })
+      }
+    }
+
+    // Ensure user exists before proceeding
+    if (!user) {
+      return res.status(401).json({
+        success: false,
+        message: 'Invalid email or password.',
+      })
     }
 
     // Check password
