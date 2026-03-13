@@ -10,6 +10,8 @@ export interface AuthRequest extends Request {
   user?: IUser
 }
 
+export type IAuthRequest = AuthRequest
+
 export interface IReport {
   _id?: string
   title: string

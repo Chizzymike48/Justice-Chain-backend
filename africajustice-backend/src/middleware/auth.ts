@@ -1,14 +1,13 @@
 import { NextFunction, Request, Response } from 'express'
 import jwt, { JwtPayload } from 'jsonwebtoken'
 import { captureError, addBreadcrumb } from '../config/sentry'
+import type { AuthRequest } from '../types'
 
 interface AuthTokenPayload extends JwtPayload {
   id: string
   email: string
   role: string
 }
-
-import type { AuthRequest } from '../types';
 
 /**
  * Parse Bearer token from Authorization header
@@ -147,3 +146,5 @@ export const verifyToken = (token: string): AuthTokenPayload | null => {
     return null
   }
 }
+
+export type { AuthRequest } from '../types'
