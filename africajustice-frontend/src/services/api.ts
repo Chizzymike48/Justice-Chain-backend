@@ -20,6 +20,7 @@ const normalizeApiBaseUrl = (value?: string): string => {
 
 export const API_BASE_URL = normalizeApiBaseUrl(import.meta.env.VITE_API_URL as string | undefined)
 const AUTH_TOKEN_KEY = 'authToken'
+const LANGUAGE_KEY = 'language'
 
 const api = axios.create({
   baseURL: API_BASE_URL,
@@ -33,6 +34,9 @@ api.interceptors.request.use((config) => {
   if (token) {
     config.headers.Authorization = `Bearer ${token}`
   }
+  // Include language header for multi-language support
+  const language = localStorage.getItem(LANGUAGE_KEY) || 'en'
+  config.headers['Accept-Language'] = language
   return config
 })
 

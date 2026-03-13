@@ -7,6 +7,7 @@ export interface ILiveStream {
   streamId?: string
   caseId?: string
   userId?: string
+  language?: 'en' | 'fr' | 'es' | 'sw' | 'pt' | 'am' | 'ha' | 'yo' | 'ig'
   status: 'initializing' | 'active' | 'stopped'
   viewerCount?: number
   createdAt?: Date
@@ -20,6 +21,7 @@ const liveStreamSchema = new Schema<ILiveStream>({
   streamId: { type: String, required: false, unique: false },
   caseId: { type: String, required: false },
   userId: { type: String, required: false },
+  language: { type: String, enum: ['en', 'fr', 'es', 'sw', 'pt', 'am', 'ha', 'yo', 'ig'], default: 'en' },
   status: { type: String, enum: ['initializing', 'active', 'stopped'], default: 'initializing' },
   viewerCount: { type: Number, default: 0 },
 }, {

@@ -6,11 +6,12 @@ import { AuthRequest } from '../middleware/auth'
 
 export const registerController = async (req: any, res: Response) => {
   try {
-    const { email, password, name, role } = req.body as {
+    const { email, password, name, role, preferredLanguage } = req.body as {
       email?: string
       password?: string
       name?: string
       role?: string
+      preferredLanguage?: string
     }
 
     // Validate required fields
@@ -34,12 +35,13 @@ export const registerController = async (req: any, res: Response) => {
     const salt = await bcrypt.genSalt(10)
     const hashedPassword = await bcrypt.hash(password, salt)
 
-    // Create user
+    // Create user with language preference
     const user = await User.create({
       email: email.toLowerCase(),
       password: hashedPassword,
       name,
       role: role || 'citizen',
+      preferredLanguage: preferredLanguage || 'en',
     })
 
     // Generate JWT token (same as login)
@@ -63,6 +65,7 @@ export const registerController = async (req: any, res: Response) => {
           email: user.email,
           name: user.name,
           role: user.role,
+          preferredLanguage: user.preferredLanguage || 'en',
         },
       },
     })
@@ -77,7 +80,11 @@ export const registerController = async (req: any, res: Response) => {
 
 export const loginController = async (req: any, res: Response) => {
   try {
-    const { email, password } = req.body as { email?: string; password?: string }
+    const { email, password, preferredLanguage } = req.body as {
+      email?: string
+      password?: string
+      preferredLanguage?: string
+    }
 
     // Validate required fields
     if (!email || !password) {
@@ -88,12 +95,17 @@ export const loginController = async (req: any, res: Response) => {
     }
 
     // Find user
-    const user = await User.findOne({ email: email.toLowerCase() })
+    let user = await User.findOne({ email: email.toLowerCase() })
     if (!user) {
       return res.status(401).json({
         success: false,
         message: 'Invalid email or password.',
       })
+    }
+
+    // Update language if provided in login request
+    if (preferredLanguage) {
+      user = await User.findByIdAndUpdate(user.id, { preferredLanguage }, { new: true })
     }
 
     // Check password
@@ -126,6 +138,7 @@ export const loginController = async (req: any, res: Response) => {
           email: user.email,
           name: user.name,
           role: user.role,
+          preferredLanguage: user.preferredLanguage || 'en',
         },
       },
     })

@@ -9,6 +9,7 @@ export interface IReport {
   amount?: number
   source?: string
   status: string
+  language?: 'en' | 'fr' | 'es' | 'sw' | 'pt' | 'am' | 'ha' | 'yo' | 'ig'
   moderationReason?: string
   moderatedBy?: string
   moderatedAt?: Date
@@ -25,6 +26,7 @@ const reportSchema = new Schema<IReport>({
   amount: { type: Number, required: false },
   source: { type: String, required: false },
   status: { type: String, default: 'open' },
+  language: { type: String, enum: ['en', 'fr', 'es', 'sw', 'pt', 'am', 'ha', 'yo', 'ig'], default: 'en' },
   moderationReason: { type: String, required: false },
   moderatedBy: { type: String, required: false },
   moderatedAt: { type: Date, required: false },

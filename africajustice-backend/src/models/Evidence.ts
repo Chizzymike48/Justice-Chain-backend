@@ -5,6 +5,7 @@ export interface IEvidence {
   fileName: string
   sourceNote?: string
   status: string
+  language?: 'en' | 'fr' | 'es' | 'sw' | 'pt' | 'am' | 'ha' | 'yo' | 'ig'
   s3Key?: string // S3 object key
   s3Url?: string // Signed S3 URL
   fileSize?: number // File size in bytes
@@ -30,6 +31,7 @@ const evidenceSchema = new Schema<IEvidence>({
   fileName: { type: String, required: true },
   sourceNote: { type: String, required: false, default: '' },
   status: { type: String, required: false, default: 'queued' },
+  language: { type: String, enum: ['en', 'fr', 'es', 'sw', 'pt', 'am', 'ha', 'yo', 'ig'], default: 'en' },
   s3Key: { type: String, required: false },
   s3Url: { type: String, required: false },
   fileSize: { type: Number, required: false },

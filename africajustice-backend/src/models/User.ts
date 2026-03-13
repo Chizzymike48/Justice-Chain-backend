@@ -5,6 +5,7 @@ export interface IUser {
   password: string
   name: string
   role: string
+  preferredLanguage?: 'en' | 'fr' | 'es' | 'sw' | 'pt' | 'am' | 'ha' | 'yo' | 'ig'
   createdAt?: Date
   updatedAt?: Date
 }
@@ -14,6 +15,7 @@ const userSchema = new Schema<IUser>({
   password: { type: String, required: true },
   name: { type: String, required: true },
   role: { type: String, default: 'citizen' },
+  preferredLanguage: { type: String, enum: ['en', 'fr', 'es', 'sw', 'pt', 'am', 'ha', 'yo', 'ig'], default: 'en' },
 }, {
   timestamps: true,
 })
