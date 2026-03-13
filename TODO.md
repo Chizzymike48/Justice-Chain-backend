@@ -15,7 +15,7 @@
 - Run: `cd africajustice-backend && npm start`
 - Confirm server starts without errors (Ctrl+C to stop)
 
-### 4. [ ] Re-deploy on Render
+### 4. [x] Re-deploy on Render
 - Push changes to main branch on https://github.com/Chizzymike48/Justice-Chain-backend
 - Monitor Render dashboard for successful build/deploy
 
@@ -23,5 +23,5 @@
 - Test API endpoints on Render URL
 - Check logs for errors
 
-**Status: Starting step 1**
+**Status: Deploy triggered - monitor Render dashboard**
 
