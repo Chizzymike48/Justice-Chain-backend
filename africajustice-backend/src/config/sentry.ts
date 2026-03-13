@@ -1,6 +1,6 @@
 import * as Sentry from '@sentry/node';
 import { nodeProfilingIntegration } from '@sentry/profiling-node';
-import type { Express } from 'express';
+import type { Express, NextFunction, Request, Response } from 'express';
 
 const environment = process.env.NODE_ENV || 'development';
 const sentryDsn = process.env.SENTRY_DSN;
@@ -67,7 +67,7 @@ export function setupSentryMiddleware(app: Express): void {
   if (!sentryDsn) return;
 
   // Tracing middleware for performance monitoring
-  app.use((req, res, next) => {
+  app.use((req: Request, res: Response, next: NextFunction) => {
     const start = Date.now();
     res.once('finish', () => {
       const duration = Date.now() - start;
@@ -95,7 +95,7 @@ export function setupSentryMiddleware(app: Express): void {
 export function setupSentryErrorHandler(app: Express): void {
   if (!sentryDsn) return;
 
-  app.use((error: unknown, req: any, res: any, _next: any) => {
+  app.use((error: unknown, req: Request, res: Response, _next: NextFunction) => {
     Sentry.captureException(error);
     res.status(500).json({
       success: false,
