@@ -3,8 +3,8 @@ services:
     name: justicechain-backend
     runtime: node
     rootDir: africajustice-backend
-    buildCommand: cd africajustice-backend && npm install && npm run build
-    startCommand: cd africajustice-backend && npm start
+    buildCommand: npm install && npm run build
+    startCommand: npm start
     memoryLimit: 1GB
     disk:
       name: justicechain_data
