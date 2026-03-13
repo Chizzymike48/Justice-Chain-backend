@@ -156,8 +156,24 @@ const LiveStreamingComponent: FC<LiveStreamingProps> = ({ streamTitle, caseId, o
     if (!streamRef.current) return
 
     try {
+      // Try multiple codec options for browser compatibility
+      const codecOptions = [
+        'video/webm;codecs=vp9',
+        'video/webm;codecs=vp8',
+        'video/webm;codecs=h264',
+        'video/webm',
+      ]
+      
+      let selectedMimeType = ''
+      for (const mimeType of codecOptions) {
+        if (MediaRecorder.isTypeSupported(mimeType)) {
+          selectedMimeType = mimeType
+          break
+        }
+      }
+
       const mediaRecorder = new MediaRecorder(streamRef.current, {
-        mimeType: 'video/webm;codecs=vp9',
+        mimeType: selectedMimeType || undefined,
       })
 
       mediaRecorder.ondataavailable = (event) => {

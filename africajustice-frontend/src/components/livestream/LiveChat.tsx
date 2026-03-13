@@ -15,6 +15,17 @@ interface LiveChatProps {
   caseId?: string
 }
 
+const resolveSocketOrigin = (): string => {
+  const fallback = typeof window !== 'undefined' ? window.location.origin : 'http://localhost:5000'
+  const apiUrl = import.meta.env.VITE_API_URL as string | undefined
+  if (!apiUrl) return fallback
+  try {
+    return new URL(apiUrl).origin
+  } catch {
+    return apiUrl.replace(/\/api\/v1\/?$/i, '') || fallback
+  }
+}
+
 const LiveChatComponent: FC<LiveChatProps> = ({ streamId, caseId }) => {
   const { user } = useAuth()
   const [messages, setMessages] = useState<ChatMessage[]>([])
@@ -25,7 +36,8 @@ const LiveChatComponent: FC<LiveChatProps> = ({ streamId, caseId }) => {
 
   // Initialize socket connection
   useEffect(() => {
-    const socket = io('http://localhost:5000', {
+    const socketOrigin = resolveSocketOrigin()
+    const socket = io(socketOrigin, {
       reconnection: true,
       reconnectionDelay: 1000,
       reconnectionDelayMax: 5000,
