@@ -1,6 +1,6 @@
-import { en, fr, es, sw, pt, am } from '../locales/translations';
+import { en, fr, es, sw, pt, am, ha, yo, ig } from '../locales/translations';
 
-export type Language = 'en' | 'fr' | 'es' | 'sw' | 'pt' | 'am';
+export type Language = 'en' | 'fr' | 'es' | 'sw' | 'pt' | 'am' | 'ha' | 'yo' | 'ig';
 
 export interface Translations {
   chat: {
@@ -72,6 +72,9 @@ export const LANGUAGES: { [key in Language]: string } = {
   sw: 'Kiswahili',
   pt: 'Português',
   am: 'አማርኛ',
+  ha: 'Hausa',
+  yo: 'Yoruba',
+  ig: 'Igbo',
 };
 
 export const TRANSLATIONS: { [key in Language]: Translations } = {
@@ -81,6 +84,9 @@ export const TRANSLATIONS: { [key in Language]: Translations } = {
   sw,
   pt,
   am,
+  ha,
+  yo,
+  ig,
 };
 
 export class I18nService {

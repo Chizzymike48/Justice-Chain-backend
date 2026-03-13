@@ -3,6 +3,8 @@
  * Handles speech-to-text conversion using Web Speech API
  */
 
+import resolveSpeechLocale from './speechLocale';
+
 export class VoiceRecognitionService {
   private recognition: SpeechRecognitionLike | null = null;
   private isListening: boolean = false;
@@ -27,7 +29,7 @@ export class VoiceRecognitionService {
 
     this.recognition.continuous = false;
     this.recognition.interimResults = true;
-    this.recognition.language = 'en-US';
+    this.recognition.language = resolveSpeechLocale('en');
 
     this.recognition.onstart = () => {
       this.isListening = true;
@@ -89,6 +91,10 @@ export class VoiceRecognitionService {
     if (this.recognition) {
       this.recognition.language = language;
     }
+  }
+
+  public setLanguageByCode(language: string) {
+    this.setLanguage(resolveSpeechLocale(language));
   }
 }
 

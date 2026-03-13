@@ -381,3 +381,210 @@ export const am = {
     language: 'ቋንቋ',
   },
 };
+
+// Hausa
+export const ha = {
+  chat: {
+    title: 'Justice Chain Mataimaki',
+    description: 'Ka tambaye ni komai game da rahoto',
+    placeholder: 'Rubuta ko yi magana...',
+    placeholderFull: 'Rubuta sakonka ko danna makirufo don magana...',
+    send: 'Aika',
+    listen: 'Saurara',
+    stop: 'Tsaya',
+    speaking: 'Ina sauraro... yi magana yanzu',
+    listeningTip: 'Tukwici: Danna makirufo don fadin tambayarka',
+    noMessages: 'Babu sako tukuna',
+    startConversation: 'Fara tattaunawa da mataimaki a kasa',
+    hello: 'Sannu! Ni ne mataimakin Justice Chain. Ta yaya zan taimaka maka yau?',
+    welcome: 'Barka da zuwa Justice Chain! Ina nan don taimaka maka rahoton cin hanci da bin diddigin sharioi. Me zan iya yi maka?',
+    reportHelp:
+      'Don rahoton cin hanci, je zuwa sashen "Report Corruption" ka bayar da bayanai game da abin da ya faru, ciki har da rana, wuri, da wadanda suka shiga. Haka kuma zaka iya loda hujja ko fara live stream idan ya dace.',
+    evidenceHelp:
+      'Hujja na iya hada da takardu, hotuna, bidiyo, ko rikodin sauti. Don live stream, zaka iya watsa kai tsaye daga app. Duk hujja ana adanawa lafiya kuma ana dubawa da tawagar kula.',
+    caseStatus:
+      'Zaka iya duba matsayin shariarka a "My Cases" dashboard. Sharioi suna bi matakai da dama: an shigar, ana dubawa, an tabbatar, an daukaka, an warware.',
+    security:
+      'An boye bayananka kuma ana adanawa lafiya. Dukkan sadarwa sirri ne, kuma hujjoji ana kare su. Zaka iya rahoto ba tare da suna ba idan ka so.',
+    default:
+      'Ina nan don taimaka! Zaka iya tambayata game da rahoton cin hanci, loda hujja, bin diddigin sharioi, ko duk wani abu game da Justice Chain. Ta yaya zan taimaka?',
+    stats: {
+      totalMessages: 'Jimillar sakonni',
+      yourMessages: 'Sakonka',
+      botResponses: 'Amsoshin bot',
+      averageRating: 'Matsakaicin kima',
+    },
+    toolbar: {
+      conversation: 'Tattaunawa',
+      search: 'Bincike',
+      export: 'Fitarwa',
+      delete: 'Goge',
+    },
+    actions: {
+      rate: 'Kimanta wannan amsa',
+      speak: 'Karanta amsa',
+      search: 'Bincika tattaunawa',
+      export: 'Fitar da JSON',
+      delete: 'Goge tsoffin sakonni',
+      exportSuccess: 'An fitar da tattaunawa cikin nasara',
+    },
+  },
+  navbar: {
+    home: 'Gida',
+    livestreams: 'Watsa kai tsaye',
+    report: 'Rahoto',
+    explore: 'Bincika',
+    workspace: 'Wurin aiki',
+    help: 'Taimako & Jagora',
+    admin: 'Admin',
+    assistant: 'Mataimaki AI',
+  },
+  common: {
+    loading: 'Ana lodawa...',
+    error: 'Kuskure',
+    success: 'Nasara',
+    cancel: 'Soke',
+    delete: 'Goge',
+    confirm: 'Tabbatar',
+    close: 'Rufe',
+    language: 'Harshe',
+  },
+};
+
+// Yoruba
+export const yo = {
+  chat: {
+    title: 'Justice Chain Oluranlowo',
+    description: 'Bere ohunkohun nipa ijabo',
+    placeholder: 'Te si tabi soro...',
+    placeholderFull: 'Te ifiranse re tabi te mikurofo lati soro...',
+    send: 'Firanse',
+    listen: 'Gbo',
+    stop: 'Duro',
+    speaking: 'Mo n gbo... so bayi',
+    listeningTip: 'Imoran: Te mikurofo lati so ibeere re',
+    noMessages: 'Ko si ifiranse sibesibe',
+    startConversation: 'Bere ibanisoro pelu oluranlowo ni isale',
+    hello: 'Pele! Emi ni Oluranlowo Justice Chain. Bawo ni mo se le ran e lowo loni?',
+    welcome: 'Kaabo si Justice Chain! Mo wa nibi lati ran e lowo lati fi ijabo ibaje ati lati tele awon oran. Kini mo le se fun e?',
+    reportHelp:
+      'Lati fi ijabo ibaje, lo si apakan "Report Corruption" ki o pese alaye nipa ohun to sele, pelu ojo, ibi, ati awon eniyan ti o kan. O tun le ko eri ati bere live stream ti o ba nilo.',
+    evidenceHelp:
+      'Eri le je iwe, foto, fidio, tabi gbigbasilẹ ohun. Fun live stream, o le gbe taara lati inu app. A n tọju gbogbo eri ni aabo ati a n se atunyewo re.',
+    caseStatus:
+      'O le wo ipo oran re ninu "My Cases" dashboard. Awon oran n lo ipele pupo: ti a fi ranse, labe ayewo, ti a fidi mule, ti a gbe ga, ati ti a yanju.',
+    security:
+      'A ti daabo bo data re ati a n tọju ni aabo. Gbogbo ibanisoro ni asiri, ati a n dabobo eri. O le fi ijabo lai so oruko ti o ba fe.',
+    default:
+      'Mo wa nibi lati ran e lowo! O le beere nipa ijabo ibaje, ko eri, titele awon oran, tabi ohun miran nipa Justice Chain. Bawo ni mo se le ran e lowo?',
+    stats: {
+      totalMessages: 'Lapapo ifiranse',
+      yourMessages: 'Ifiranse re',
+      botResponses: 'Idahun bot',
+      averageRating: 'Iye aropin',
+    },
+    toolbar: {
+      conversation: 'Ibanisoro',
+      search: 'Wa',
+      export: 'Gbe jade',
+      delete: 'Pa',
+    },
+    actions: {
+      rate: 'Se ayewo idahun yi',
+      speak: 'Ka idahun',
+      search: 'Wa ibanisoro',
+      export: 'Gbe jade bi JSON',
+      delete: 'Pa ifiranse atijo',
+      exportSuccess: 'A ti gbe ibanisoro jade ni aseyori',
+    },
+  },
+  navbar: {
+    home: 'Ile',
+    livestreams: 'Gbigbafe laaye',
+    report: 'Ijabo',
+    explore: 'Se awari',
+    workspace: 'Ibi ise',
+    help: 'Iranlowo & Itosona',
+    admin: 'Admin',
+    assistant: 'Oluranlowo AI',
+  },
+  common: {
+    loading: 'N gba...',
+    error: 'Asise',
+    success: 'Aseyori',
+    cancel: 'Fagile',
+    delete: 'Pa',
+    confirm: 'Jerisi',
+    close: 'Pa',
+    language: 'Ede',
+  },
+};
+
+// Igbo
+export const ig = {
+  chat: {
+    title: 'Justice Chain Onyemaka',
+    description: 'Juo m ihe obula gbasara report',
+    placeholder: 'Dee ma obu kwuo...',
+    placeholderFull: 'Dee ozi gi ma obu pia mikrofo ka i kwuo...',
+    send: 'Zipu',
+    listen: 'Gee',
+    stop: 'Kwusi',
+    speaking: 'Ana m ege nti... kwuo ugbua',
+    listeningTip: 'Ndumodu: Pia mikrofo ka i kwuo ajuju gi',
+    noMessages: 'Enweghi ozi ugbua',
+    startConversation: 'Bido mkparita uka na onyemaka nokpuru',
+    hello: 'Ndewo! Mu bu onyemaka Justice Chain. Kedu ka m ga-esi nyere gi taa?',
+    welcome: 'Nnoo na Justice Chain! Ana m enyer gi aka kpoo report corruption na iso ikpe. Kedu ihe m ga-eme gi?',
+    reportHelp:
+      'Iji kpoo report corruption, gaa na ngalaba "Report Corruption" ma nye nkowa banyere ihe mere, tinyere ubochi, ebe, na ndi metutara. I nwekwara ike itinye evidence ma obu bido live stream ma oburu na odi mkpa.',
+    evidenceHelp:
+      'Evidence nwere ike ibu akwukwo, foto, vidio, ma obu ndebanye olu. Maka live stream, i nwere ike ibuga ozugbo site na app. A na-echekwa evidence niile nke oma ma nyochaa ya.',
+    caseStatus:
+      'I nwere ike ilele onodu ikpe gi na "My Cases" dashboard. Ikpe na-agafe ogbo di iche: e zigara, na nlele, ekwenyesiri, ebughariri elu, na edozi.',
+    security:
+      'A na-ezobe data gi ma na-echekwa ya nke oma. Nkwurita okwu nile bu nke nzuzo, a na-echekwa evidence. I nwere ike kpoo report na enweghi aha gi ma oburu na i choro.',
+    default:
+      'Ana m enyer gi aka! I nwere ike aju banyere report corruption, itinye evidence, iso ikpe, ma obu ihe o bula gbasara Justice Chain. Kedu ka m ga-esi nyere gi?',
+    stats: {
+      totalMessages: 'Onu ogugu ozi',
+      yourMessages: 'Ozi gi',
+      botResponses: 'Aziza bot',
+      averageRating: 'Ngosiputa ogo',
+    },
+    toolbar: {
+      conversation: 'Mkparita uka',
+      search: 'Choo',
+      export: 'Wepu',
+      delete: 'Hichapu',
+    },
+    actions: {
+      rate: 'Tulee aziza a',
+      speak: 'Kwuo aziza',
+      search: 'Choo mkparita uka',
+      export: 'Wepu dika JSON',
+      delete: 'Hichapu ozi ochie',
+      exportSuccess: 'E weputara mkparita uka nke oma',
+    },
+  },
+  navbar: {
+    home: 'Ulo',
+    livestreams: 'Live Streams',
+    report: 'Report',
+    explore: 'Nyocha',
+    workspace: 'Ebe oru',
+    help: 'Enyemaka na nduzi',
+    admin: 'Admin',
+    assistant: 'Onyemaka AI',
+  },
+  common: {
+    loading: 'Na-ebunye...',
+    error: 'Njehie',
+    success: 'Nke oma',
+    cancel: 'Kagbuo',
+    delete: 'Hichapu',
+    confirm: 'Kwenye',
+    close: 'Mechie',
+    language: 'Asusu',
+  },
+};

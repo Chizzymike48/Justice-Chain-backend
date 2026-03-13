@@ -12,6 +12,11 @@ export interface ChatTurn {
 export type ChatLanguage = 'en' | 'pidgin' | 'hausa' | 'yoruba' | 'igbo'
 
 const SUPPORTED_LANGUAGES: ChatLanguage[] = ['en', 'pidgin', 'hausa', 'yoruba', 'igbo']
+const LANGUAGE_ALIASES: Record<string, ChatLanguage> = {
+  ha: 'hausa',
+  yo: 'yoruba',
+  ig: 'igbo',
+}
 
 export const normalizeChatLanguage = (value?: string): ChatLanguage => {
   const normalized = value?.trim().toLowerCase()
@@ -19,9 +24,8 @@ export const normalizeChatLanguage = (value?: string): ChatLanguage => {
     return 'en'
   }
 
-  return SUPPORTED_LANGUAGES.includes(normalized as ChatLanguage)
-    ? (normalized as ChatLanguage)
-    : 'en'
+  const canonical = LANGUAGE_ALIASES[normalized] ?? (normalized as ChatLanguage)
+  return SUPPORTED_LANGUAGES.includes(canonical) ? canonical : 'en'
 }
 
 interface ChatAssistantMetrics {

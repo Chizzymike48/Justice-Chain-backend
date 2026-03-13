@@ -44,6 +44,11 @@ const ChatbotPage: React.FC = () => {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const token = localStorage.getItem(AUTH_TOKEN_KEY);
 
+  useEffect(() => {
+    voiceRecognitionService.setLanguageByCode(language);
+    textToSpeechService.setLanguage(language);
+  }, [language]);
+
   const fetchHistory = useCallback(async () => {
     if (!token) {
       console.warn('No authentication token, skipping history fetch');

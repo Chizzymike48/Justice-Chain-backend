@@ -23,7 +23,6 @@ export const chatRequestValidator: ValidationChain[] = [
     .withMessage('history text must not exceed 3000 characters.'),
   body('preferredLanguage')
     .optional({ values: 'falsy' })
-    .isIn(['en', 'pidgin', 'hausa', 'yoruba', 'igbo'])
-    .withMessage('preferredLanguage must be one of en, pidgin, hausa, yoruba, igbo.'),
+    .isIn(['en', 'pidgin', 'hausa', 'yoruba', 'igbo', 'ha', 'yo', 'ig'])
+    .withMessage('preferredLanguage must be one of en, pidgin, hausa, yoruba, igbo, ha, yo, ig.'),
 ]
-

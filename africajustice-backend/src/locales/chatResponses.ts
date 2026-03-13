@@ -8,6 +8,9 @@ export const BOT_RESPONSES_TRANSLATIONS: { [key: string]: { [language: string]: 
     sw: 'Ili kuripoti ufisadi, tafadhali nenda kwenye sehemu ya "Ripoti Ufisadi" na toa maelezo juu ya tukio, pamoja na tarehe, mahali, na watu waliobadilika. Unaweza pia kupakia ushahidi na kuanza uhamishaji wa moja kwa moja ikiwa inahitajika.',
     pt: 'Para denunciar corrupção, vá à seção "Denunciar Corrupção" e forneça detalhes sobre o incidente, incluindo data, local e pessoas envolvidas. Você também pode fazer upload de evidências e iniciar uma transmissão ao vivo se necessário.',
     am: 'ሪፖርት ለመቃወም፣ እጩደ ሩሲ ሌክ "ሪፖር ሪፖር" ተስፋ ተሰ ውጤቶች ጋር ይሞክርሯል።',
+    ha: 'Don rahoton cin hanci, je zuwa sashen "Report Corruption" ka bayar da bayanai game da abin da ya faru, ciki har da rana, wuri, da wadanda suka shiga. Haka kuma zaka iya loda hujja ko fara live stream idan ya dace.',
+    yo: 'Lati fi ijabo ibaje, lo si apakan "Report Corruption" ki o pese alaye nipa ohun to sele, pelu ojo, ibi, ati awon eniyan ti o kan. O tun le ko eri ati bere live stream ti o ba nilo.',
+    ig: 'Iji kpoo report corruption, gaa na ngalaba "Report Corruption" ma nye nkowa banyere ihe mere, tinyere ubochi, ebe, na ndi metutara. I nwekwara ike itinye evidence ma obu bido live stream ma oburu na odi mkpa.',
   },
 
   // Evidence Help
@@ -17,7 +20,10 @@ export const BOT_RESPONSES_TRANSLATIONS: { [key: string]: { [language: string]: 
     es: 'La evidencia puede incluir documentos, fotos, videos o grabaciones de audio. Para transmisiones en vivo, puedes transmitir directamente desde la aplicación. Toda la evidencia se almacena de forma segura y es revisada por nuestro equipo de moderación.',
     sw: 'Ushahidi unaweza kujumuisha nyaraka, picha, video, au kurekodi sauti. Kwa mihadhira ya moja kwa moja, unaweza kusambaza moja kwa moja kutoka programu. Ushahidi wote unakifanywa kwa usalama na unakaguliwa na timu yetu ya ujumbe.',
     pt: 'As evidências podem incluir documentos, fotos, vídeos ou gravações de áudio. Para transmissões ao vivo, você pode transmitir diretamente do aplicativo. Todas as evidências são armazenadas com segurança e revisadas pela nossa equipe de moderação.',
-    am: 'የ ሐወ ንድ ፓሚ ሐዴ ወይም ምእራፍ ሉህ ሙቅተ।',
+    am: 'የ ሐወ ንድ ፓሚ ሐዴ ወይም ምእራፍ ሉህ ሙቅተ။',
+    ha: 'Hujja na iya hada da takardu, hotuna, bidiyo, ko rikodin sauti. Don live stream, zaka iya watsa kai tsaye daga app. Duk hujja ana adanawa lafiya kuma ana dubawa da tawagar kula.',
+    yo: 'Eri le je iwe, foto, fidio, tabi gbigbasilẹ ohun. Fun live stream, o le gbe taara lati inu app. A n tọju gbogbo eri ni aabo ati a n se atunyewo re.',
+    ig: 'Evidence nwere ike ibu akwukwo, foto, vidio, ma obu ndebanye olu. Maka live stream, i nwere ike ibuga ozugbo site na app. A na-echekwa evidence niile nke oma ma nyochaa ya.',
   },
 
   // Case Status
@@ -28,6 +34,9 @@ export const BOT_RESPONSES_TRANSLATIONS: { [key: string]: { [language: string]: 
     sw: 'Unaweza kuona hali ya kesi yako katika dashboard ya "Kesi Zangu". Kesi hupitia hatua kadhaa: ilisisitizwa, chini ya ukaguzi, inathibitishwa, inapandishwa, na kutatuliwa.',
     pt: 'Você pode ver o status do seu caso no painel "Meus Casos". Os casos passam por vários estágios: enviado, sob revisão, verificado, escalado e resolvido.',
     am: 'ሙከራ አናሪ ማታወቂያ ግቤት "ሙከራ" ደሳሳ ሊያዩ ይችላም።',
+    ha: 'Zaka iya duba matsayin shariarka a "My Cases" dashboard. Sharioi suna bi matakai da dama: an shigar, ana dubawa, an tabbatar, an daukaka, an warware.',
+    yo: 'O le wo ipo oran re ninu "My Cases" dashboard. Awon oran n lo ipele pupo: ti a fi ranse, labe ayewo, ti a fidi mule, ti a gbe ga, ati ti a yanju.',
+    ig: 'I nwere ike ilele onodu ikpe gi na "My Cases" dashboard. Ikpe na-agafe ogbo di iche: e zigara, na nlele, ekwenyesiri, ebughariri elu, na edozi.',
   },
 
   // Security
@@ -38,6 +47,9 @@ export const BOT_RESPONSES_TRANSLATIONS: { [key: string]: { [language: string]: 
     sw: 'Data yako inasimuliwa na kuhifadhiwa kwa usalama. Mawasiliano yote ni ya kidogo, na ushahidi unalindwa na itifaki yetu ya usalama. Unaweza kuripoti bila jina ikiwa unafanya hivyo.',
     pt: 'Seus dados são criptografados e armazenados com segurança. Todas as comunicações são privadas, e as evidências são protegidas pelos nossos protocolos de segurança. Você pode denunciar anonimamente se preferir.',
     am: 'መረጃ ሚስጥር ነው። ሁሉም ግንኙነቶች ስሪት።',
+    ha: 'An boye bayananka kuma ana adanawa lafiya. Dukkan sadarwa sirri ne, kuma hujjoji ana kare su. Zaka iya rahoto ba tare da suna ba idan ka so.',
+    yo: 'A ti daabo bo data re ati a n tọju ni aabo. Gbogbo ibanisoro ni asiri, ati a n dabobo eri. O le fi ijabo lai so oruko ti o ba fe.',
+    ig: 'A na-ezobe data gi ma na-echekwa ya nke oma. Nkwurita okwu nile bu nke nzuzo, a na-echekwa evidence. I nwere ike kpoo report na enweghi aha gi ma oburu na i choro.',
   },
 
   // Default
@@ -48,6 +60,9 @@ export const BOT_RESPONSES_TRANSLATIONS: { [key: string]: { [language: string]: 
     sw: 'Nipo hapa kukusaidia! Unaweza kuniuliza juu ya kuripoti ufisadi, kupakia ushahidi, kufuatilia kesi, au kitu kingine chochote kuhusu Justice Chain. Ninaweza kukusaidia vipi?',
     pt: 'Estou aqui para ajudá-lo! Você pode me perguntar sobre denunciar corrupção, carregar evidências, acompanhar casos ou qualquer outra coisa sobre Justice Chain. Como posso ajudá-lo?',
     am: 'እንዴት ሊረዱ ይችላString?',
+    ha: 'Ina nan don taimaka! Zaka iya tambayata game da rahoton cin hanci, loda hujja, bin diddigin sharioi, ko duk wani abu game da Justice Chain. Ta yaya zan taimaka?',
+    yo: 'Mo wa nibi lati ran e lowo! O le beere nipa ijabo ibaje, ko eri, titele awon oran, tabi ohun miran nipa Justice Chain. Bawo ni mo se le ran e lowo?',
+    ig: 'Ana m enyer gi aka! I nwere ike aju banyere report corruption, itinye evidence, iso ikpe, ma obu ihe o bula gbasara Justice Chain. Kedu ka m ga-esi nyere gi?',
   },
 
   // Help
@@ -58,14 +73,29 @@ export const BOT_RESPONSES_TRANSLATIONS: { [key: string]: { [language: string]: 
     sw: 'Naweza kukusaidia na:\n📝 Kuripoti ufisadi - Wasilisha ripoti\n📎 Kupakia ushahidi - Picha, video, hati\n🔍 Kuangalia hali - Kufuatilia ripoti zako\n🔒 Usalama - Jua kuhusu vipengele vyetu\n💬 Maswali ya kawaida - Uniulize chochote!',
     pt: 'Posso ajudá-lo com:\n📝 Denunciar corrupção - Enviar denúncias\n📎 Carregar evidências - Fotos, vídeos, documentos\n🔍 Verificar status - Acompanhar suas denúncias\n🔒 Segurança - Learn about our features\n💬 Perguntas gerais - Me perguntem qualquer coisa!',
     am: 'እንደምታርዱ እርዳት እሰጣለሁ።',
+    ha: 'Zan iya taimaka maka da:\n- Rahoton cin hanci - Ka tura rahoto game da cin hanci\n- Loda hujja - Hotuna, bidiyo, takardu\n- Duba matsayin sharia - Bi rahotonnin da ka tura\n- Tsaro da sirri - Koyi game da kariya\n- Tambayoyi gaba daya - Tambaye ni komai game da Justice Chain\n\nKawai ka rubuta tambayarka zan taimaka!',
+    yo: 'Mo le ran e lowo da:\n- Ijabo ibaje - Fi ijabo ranse\n- Kiko eri - Foto, fidio, iwe\n- Ayewo ipo oran - Tele ijabo re\n- Aabo ati asiri - Koye nipa aabo wa\n- Awon ibeere gbogbogbo - Beere ohunkohun nipa Justice Chain\n\nKan te ibeere re emi a ran e lowo!',
+    ig: 'Aga m enyer gi aka na:\n- Report corruption - Zipu report banyere ibaje\n- Itinye evidence - Foto, vidio, akwukwo\n- Nyocha onodu ikpe - Sochie reports gi\n- Nchedo na nzuzo - Mata banyere nchedo anyi\n- Ajuju izugbe - Juo m ihe obula gbasara Justice Chain\n\nDee ajuju gi, aga m enyer gi aka!',
   },
+};
+
+const normalizeTranslationLanguage = (language: string = 'en'): string => {
+  const normalized = language?.trim().toLowerCase();
+  if (!normalized) {
+    return 'en';
+  }
+  if (normalized === 'hausa') return 'ha';
+  if (normalized === 'yoruba') return 'yo';
+  if (normalized === 'igbo') return 'ig';
+  return normalized;
 };
 
 // Helper function to get translated bot response
 export const getTranslatedBotResponse = (responseKey: string, language: string = 'en'): string => {
+  const normalized = normalizeTranslationLanguage(language);
   const responses = BOT_RESPONSES_TRANSLATIONS[responseKey];
-  if (!responses) return BOT_RESPONSES_TRANSLATIONS.default[language] || BOT_RESPONSES_TRANSLATIONS.default.en;
-  return responses[language] || responses.en;
+  if (!responses) return BOT_RESPONSES_TRANSLATIONS.default[normalized] || BOT_RESPONSES_TRANSLATIONS.default.en;
+  return responses[normalized] || responses.en;
 };
 
 export default BOT_RESPONSES_TRANSLATIONS;

@@ -3,13 +3,24 @@
  * Handles text-to-speech conversion using Web Speech API
  */
 
+import resolveSpeechLocale from './speechLocale';
+
 export class TextToSpeechService {
   private synthesis: SpeechSynthesis | null;
   private isPlaying: boolean = false;
   private currentUtterance: SpeechSynthesisUtterance | null = null;
+  private preferredLanguage: string | null = null;
+  private preferredVoice: SpeechSynthesisVoice | null = null;
 
   constructor() {
     this.synthesis = typeof window !== 'undefined' ? window.speechSynthesis : null;
+    if (this.synthesis) {
+      this.synthesis.onvoiceschanged = () => {
+        if (this.preferredLanguage) {
+          this.selectVoiceForLanguage(this.preferredLanguage);
+        }
+      };
+    }
   }
 
   public speak(text: string, onEnd?: () => void, onError?: (error: string) => void): void {
@@ -25,6 +36,12 @@ export class TextToSpeechService {
     this.synthesis.cancel();
 
     const utterance = new SpeechSynthesisUtterance(text);
+    if (this.preferredLanguage) {
+      utterance.lang = this.preferredLanguage;
+    }
+    if (this.preferredVoice) {
+      utterance.voice = this.preferredVoice;
+    }
 
     utterance.rate = 1.0; // Speed
     utterance.pitch = 1.0; // Pitch
@@ -98,6 +115,28 @@ export class TextToSpeechService {
     if (this.currentUtterance && voices[voiceIndex]) {
       this.currentUtterance.voice = voices[voiceIndex];
     }
+  }
+
+  public setLanguage(language: string): void {
+    const locale = resolveSpeechLocale(language);
+    this.preferredLanguage = locale;
+    this.selectVoiceForLanguage(locale);
+  }
+
+  private selectVoiceForLanguage(locale: string): void {
+    const voices = this.getVoices();
+    if (!voices.length) {
+      return;
+    }
+    const normalized = locale.toLowerCase();
+    const exactMatch = voices.find((voice) => voice.lang?.toLowerCase() === normalized) || null;
+    if (exactMatch) {
+      this.preferredVoice = exactMatch;
+      return;
+    }
+    const prefix = normalized.split('-')[0];
+    const prefixMatch = voices.find((voice) => voice.lang?.toLowerCase().startsWith(prefix)) || null;
+    this.preferredVoice = prefixMatch;
   }
 }
 
