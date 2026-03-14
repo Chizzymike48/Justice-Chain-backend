@@ -2,6 +2,7 @@ import { defineConfig } from 'vitest/config'
 import react from '@vitejs/plugin-react'
 import path from 'path'
 
+// BUILD VERSION: 1.1.0 - All 9 multilingual languages (EN, FR, ES, SW, PT, AM, HA, YO, IG) - March 15, 2026
 // https://vite.dev/config/
 export default defineConfig({
   plugins: [react()],
