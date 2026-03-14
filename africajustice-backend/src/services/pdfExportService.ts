@@ -49,7 +49,6 @@ export async function generateReportPDF(
 
       const doc = new PDFDocument({
         size: pageSize,
-        layout: orientation === 'landscape' ? 'landscape' : 'portrait',
         margin: 50,
         bufferPages: true,
       })
@@ -149,7 +148,6 @@ export async function generateBulkReportsPDF(
     try {
       const doc = new PDFDocument({
         size: options.pageSize || 'A4',
-        layout: 'portrait',
         margin: 50,
         bufferPages: true,
       })
@@ -212,7 +210,6 @@ export async function generateAnalyticsPDF(
     try {
       const doc = new PDFDocument({
         size: options.pageSize || 'A4',
-        layout: 'portrait',
         margin: 50,
         bufferPages: true,
       })
