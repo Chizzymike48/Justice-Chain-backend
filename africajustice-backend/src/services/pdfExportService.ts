@@ -30,6 +30,28 @@ interface ReportExportData {
   verifications: (IVerification & { _id: string })[]
 }
 
+const DEFAULT_PAGE_SIZE: NonNullable<ExportOptions['pageSize']> = 'A4'
+const DEFAULT_ORIENTATION: NonNullable<ExportOptions['orientation']> = 'portrait'
+const PAGE_SIZES: Record<NonNullable<ExportOptions['pageSize']>, [number, number]> = {
+  A4: [595.28, 841.89],
+  Letter: [612, 792],
+}
+
+const resolvePageSize = (
+  pageSize: ExportOptions['pageSize'],
+  orientation: ExportOptions['orientation']
+): string | [number, number] => {
+  const normalizedPageSize = pageSize ?? DEFAULT_PAGE_SIZE
+  const normalizedOrientation = orientation ?? DEFAULT_ORIENTATION
+
+  if (normalizedOrientation === 'portrait') {
+    return normalizedPageSize
+  }
+
+  const [width, height] = PAGE_SIZES[normalizedPageSize]
+  return [height, width]
+}
+
 /**
  * Generate PDF report with evidence and verification details
  */
@@ -48,7 +70,7 @@ export async function generateReportPDF(
       } = options
 
       const doc = new PDFDocument({
-        size: pageSize,
+        size: resolvePageSize(pageSize, orientation),
         margin: 50,
         bufferPages: true,
       })
@@ -147,7 +169,7 @@ export async function generateBulkReportsPDF(
   return new Promise((resolve, reject) => {
     try {
       const doc = new PDFDocument({
-        size: options.pageSize || 'A4',
+        size: resolvePageSize(options.pageSize, options.orientation),
         margin: 50,
         bufferPages: true,
       })
@@ -209,7 +231,7 @@ export async function generateAnalyticsPDF(
   return new Promise((resolve, reject) => {
     try {
       const doc = new PDFDocument({
-        size: options.pageSize || 'A4',
+        size: resolvePageSize(options.pageSize, options.orientation),
         margin: 50,
         bufferPages: true,
       })
