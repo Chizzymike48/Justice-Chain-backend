@@ -37,6 +37,7 @@ const NavbarShell: React.FC = () => {
   return <Navbar key={location.pathname} />
 }
 
+// DEPLOYMENT v1.1.0: All 9 languages (EN, FR, ES, SW, PT, AM, HA, YO, IG)
 function App(): React.ReactElement {
   const [showOnboarding, setShowOnboarding] = useState(() => {
     if (typeof window === 'undefined') return false
