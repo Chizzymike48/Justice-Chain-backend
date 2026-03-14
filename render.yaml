@@ -22,7 +22,7 @@ services:
       - key: THUMBNAILS_DIR
         value: /data/thumbnails
       - key: CORS_ORIGIN
-        value: https://justicechain-frontend.onrender.com
+        value: https://justicechain-frontend.onrender.com,https://ricajustice-frontend-ah84ket7w-chizzymike48s-projects.vercel.app
       - key: MONGODB_URI
         sync: false
       - key: JWT_SECRET
