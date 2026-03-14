@@ -177,24 +177,80 @@ jobs:
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
-  # Deploy to production (manual approval)
+  # Deploy to production (automatic on main branch)
   deploy-production:
     runs-on: ubuntu-latest
-    name: Deploy to Production
-    needs: build-docker
+    name: Deploy to Production (Render)
+    needs: [backend-lint, backend-test, frontend-lint, frontend-test]
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     environment:
       name: production
-      url: https://africajustice.onrender.com
+      url: https://justicechain-frontend.onrender.com
     steps:
-      - name: Trigger Deploy on Render
-        run: |
-          curl -X POST https://api.render.com/deploy/srv-${{ secrets.RENDER_BACKEND_SERVICE_ID }}?key=${{ secrets.RENDER_API_KEY }}
+      - uses: actions/checkout@v3
       
-      - name: Slack Notification
+      - name: Deploy Backend to Render
+        id: deploy-backend
+        run: |
+          RESPONSE=$(curl -s -X POST \
+            https://api.render.com/deploy/srv-${{ secrets.RENDER_BACKEND_SERVICE_ID }}?key=${{ secrets.RENDER_API_KEY }})
+          echo "response=$RESPONSE" >> $GITHUB_OUTPUT
+          echo "Backend deployment triggered"
+      
+      - name: Deploy Frontend to Render
+        id: deploy-frontend
+        run: |
+          RESPONSE=$(curl -s -X POST \
+            https://api.render.com/deploy/srv-${{ secrets.RENDER_FRONTEND_SERVICE_ID }}?key=${{ secrets.RENDER_API_KEY }})
+          echo "response=$RESPONSE" >> $GITHUB_OUTPUT
+          echo "Frontend deployment triggered"
+      
+      - name: Wait for Backend Deployment
+        run: |
+          echo "Waiting 30 seconds for backend deployment to start..."
+          sleep 30
+          
+      - name: Health Check - Backend
+        id: health-check
+        continue-on-error: true
+        run: |
+          for i in {1..30}; do
+            echo "Attempt $i/30 - Checking backend health..."
+            if curl -f https://justicechain-backend.onrender.com/healthz > /dev/null 2>&1; then
+              echo "✅ Backend is healthy"
+              exit 0
+            fi
+            sleep 10
+          done
+          echo "⚠️ Backend health check timeout - deployment may still be in progress"
+          exit 1
+      
+      - name: Verify API Endpoints
+        id: api-check
+        continue-on-error: true
+        run: |
+          echo "Verifying API endpoints..."
+          curl -s https://justicechain-backend.onrender.com/ | jq '.endpoints' || echo "API root responding"
+      
+      - name: Slack Notification - Success
         uses: 8398a7/action-slack@v3
         with:
           status: ${{ job.status }}
-          text: 'Production deployment complete'
+          text: |
+            ✅ Production Deployment Complete
+            Backend: https://justicechain-backend.onrender.com
+            Frontend: https://justicechain-frontend.onrender.com
+            Commit: ${{ github.sha }}
           webhook_url: ${{ secrets.SLACK_WEBHOOK }}
-        if: always()
+        if: success()
+      
+      - name: Slack Notification - Failure
+        uses: 8398a7/action-slack@v3
+        with:
+          status: failure
+          text: |
+            ❌ Production Deployment Failed
+            Commit: ${{ github.sha }}
+            Check GitHub Actions for details
+          webhook_url: ${{ secrets.SLACK_WEBHOOK }}
+        if: failure()

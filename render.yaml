@@ -21,3 +21,37 @@ services:
         value: /data/recordings
       - key: THUMBNAILS_DIR
         value: /data/thumbnails
+      - key: CORS_ORIGIN
+        value: https://justicechain-frontend.onrender.com
+      - key: MONGODB_URI
+        sync: false
+      - key: JWT_SECRET
+        sync: false
+      - key: REDIS_URL
+        sync: false
+      - key: AWS_S3_BUCKET
+        sync: false
+      - key: AWS_REGION
+        sync: false
+      - key: AWS_ACCESS_KEY_ID
+        sync: false
+      - key: AWS_SECRET_ACCESS_KEY
+        sync: false
+      - key: SENTRY_DSN
+        sync: false
+      - key: OPENAI_API_KEY
+        sync: false
+      - key: SENDGRID_API_KEY
+        sync: false
+      - key: STREAM_API_KEY
+        sync: false
+
+  - type: static site
+    name: justicechain-frontend
+    runtime: node
+    rootDir: africajustice-frontend
+    buildCommand: npm ci --include=dev && npm run build
+    staticPublishPath: ./dist
+    envVars:
+      - key: VITE_API_URL
+        value: https://justicechain-backend.onrender.com/api/v1

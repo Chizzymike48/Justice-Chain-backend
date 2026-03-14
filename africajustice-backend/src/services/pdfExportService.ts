@@ -144,7 +144,10 @@ export async function generateReportPDF(
 
       // Footer with page numbers
       const pageCount = doc.bufferedPageRange().count
-      const pageHeight = PAGE_SIZES[resolvePageSize(options.pageSize)][1]
+      const normalizedPageSize = options.pageSize ?? DEFAULT_PAGE_SIZE
+      const normalizedOrientation = options.orientation ?? DEFAULT_ORIENTATION
+      const [docWidth, docHeight] = PAGE_SIZES[normalizedPageSize]
+      const pageHeight = normalizedOrientation === 'portrait' ? docHeight : docWidth
       const margin = 50
       for (let i = 0; i < pageCount; i++) {
         doc.switchToPage(i)

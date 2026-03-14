@@ -1,4 +1,5 @@
 import { createContext, useState, useContext, useEffect, useCallback, ReactNode, FC } from 'react'
+import { setSentryUser, clearSentryUser } from '../utils/sentry'
 
 interface User {
   id?: string
@@ -60,6 +61,8 @@ export const AuthProvider: FC<AuthProviderProps> = ({ children }) => {
     if (typeof userData.token === 'string' && userData.token.length > 0) {
       localStorage.setItem(AUTH_TOKEN_KEY, userData.token)
     }
+    // Set Sentry user context for error tracking
+    setSentryUser(userData.id || 'unknown', userData.email, userData.name)
   }
 
   const logout = useCallback(() => {
@@ -68,6 +71,8 @@ export const AuthProvider: FC<AuthProviderProps> = ({ children }) => {
     localStorage.removeItem('isLoggedIn')
     localStorage.removeItem('user')
     localStorage.removeItem(AUTH_TOKEN_KEY)
+    // Clear Sentry user context
+    clearSentryUser()
   }, [AUTH_TOKEN_KEY])
 
   // Validate stored token on mount
