@@ -144,9 +144,11 @@ export async function generateReportPDF(
 
       // Footer with page numbers
       const pageCount = doc.bufferedPageRange().count
+      const pageHeight = PAGE_SIZES[resolvePageSize(options.pageSize)][1]
+      const margin = 50
       for (let i = 0; i < pageCount; i++) {
         doc.switchToPage(i)
-        const footerY = doc.page.height - Math.max(30, doc.page.margins.bottom)
+        const footerY = pageHeight - margin - 20
         doc.fontSize(8).fillColor('#999').text(`Page ${i + 1} of ${pageCount}`, 50, footerY, {
           align: 'center',
         })
