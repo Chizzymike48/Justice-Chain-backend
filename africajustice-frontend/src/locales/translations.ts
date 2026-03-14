@@ -60,6 +60,20 @@ export const en = {
     close: 'Close',
     language: 'Language',
   },
+  validation: {
+    required: 'This field is required',
+    minLength: 'Too short (more details needed)',
+    maxLength: 'Too long (keep it briefer)',
+    invalidEmail: 'Invalid email address',
+    invalidPhone: 'Invalid phone number',
+    invalidAmount: 'Use numbers only',
+  },
+  formHelp: {
+    reportTitle: 'A short headline. Example: "Bribe Accepted at County Office" or "Pothole Not Fixed for 2 Years". Keep it 5-15 words.',
+    reportDescription: 'Tell the complete story. Include: What happened? When? Where? Who? How much money? Why is it wrong?',
+    reportOffice: 'Which government office, agency, or official person is involved?',
+    reportAmount: 'Estimated amount (numbers only). If unknown, type "skip".',
+  },
 };
 
 // French
@@ -123,6 +137,20 @@ export const fr = {
     confirm: 'Confirmer',
     close: 'Fermer',
     language: 'Langue',
+  },
+  validation: {
+    required: 'Ce champ est obligatoire',
+    minLength: 'Trop court (minimum requis)',
+    maxLength: 'Trop long (maximum dépassé)',
+    invalidEmail: 'Email invalide',
+    invalidPhone: 'Numéro de téléphone invalide',
+    invalidAmount: 'Utiliser des chiffres uniquement',
+  },
+  formHelp: {
+    reportTitle: 'Titre court. Exemple: "Pot-de-vin au bureau du comté" ou "Route non réparée depuis 2 ans". 5-15 mots.',
+    reportDescription: 'Racontez l\'histoire complète. Inclure: Quoi? Quand? Où? Qui? Combien? Pourquoi c\'est mal?',
+    reportOffice: 'Quel bureau, agence ou officiel est impliqué?',
+    reportAmount: 'Montant estimé (chiffres uniquement). Si inconnu, tapez "skip".',
   },
 };
 
@@ -188,6 +216,20 @@ export const es = {
     close: 'Cerrar',
     language: 'Idioma',
   },
+  validation: {
+    required: 'Este campo es requerido',
+    minLength: 'Demasiado corto',
+    maxLength: 'Demasiado largo',
+    invalidEmail: 'Email invalido',
+    invalidPhone: 'Número de teléfono invalido',
+    invalidAmount: 'Usar sólo números',
+  },
+  formHelp: {
+    reportTitle: 'Título corto. Ejemplo: "Soborno en oficina del condado" o "Calle no reparada por 2 años". 5-15 palabras.',
+    reportDescription: 'Cuente la historia completa. Incluya: ¿Qué? ¿Cuándo? ¿Dónde? ¿Quién? ¿Cuánto? ¿Por qué está mal?',
+    reportOffice: '¿Qué oficina, agencia u oficial está involucrado?',
+    reportAmount: 'Cantidad estimada (solo números). Si no sabe, escriba "skip".',
+  },
 };
 
 // Swahili
@@ -251,6 +293,20 @@ export const sw = {
     confirm: 'Thibitisha',
     close: 'Funga',
     language: 'Lugha',
+  },
+  validation: {
+    required: 'Uwanja huu unahitajika',
+    minLength: 'Mfupi sana',
+    maxLength: 'Ndefu sana',
+    invalidEmail: 'Barua pepe batili',
+    invalidPhone: 'Nambari ya simu batili',
+    invalidAmount: 'Tumia namba tu',
+  },
+  formHelp: {
+    reportTitle: 'Kichwa kicho. Mfano: "Hongo ilipokea katika ofisi ya kaunti" au "Njia haijaisambazwa kwa sababu 2 za mwaka". Maneno 5-15.',
+    reportDescription: 'Ambia hadithi kamili. Jumuisha: Nini kinetokea? Lini? Wapi? Nani? Kiasi gani? Kwa nini sio sawa?',
+    reportOffice: 'Ni ofisi gani, wakala, au afisa anayehusika?',
+    reportAmount: 'Kiasi kinachokadiriwa (namba tu). Ikiwa haijulikani, andika "skip".',
   },
 };
 
@@ -316,6 +372,20 @@ export const pt = {
     close: 'Fechar',
     language: 'Língua',
   },
+  validation: {
+    required: 'Este campo é obrigatório',
+    minLength: 'Muito curto',
+    maxLength: 'Muito longo',
+    invalidEmail: 'Email inválido',
+    invalidPhone: 'Número de telefone inválido',
+    invalidAmount: 'Use apenas números',
+  },
+  formHelp: {
+    reportTitle: 'Título curto. Exemplo: "Suborno aceito no escritório do condado" ou "Buraco não consertado por 2 anos". 5-15 palavras.',
+    reportDescription: 'Conte a história completa. Inclua: O que aconteceu? Quando? Onde? Quem? Quanto? Por que está errado?',
+    reportOffice: 'Qual escritório, agência ou funcionário está envolvido?',
+    reportAmount: 'Valor estimado (apenas números). Se desconhecido, digite "skip".',
+  },
 };
 
 // Amharic (Ethiopia)
@@ -379,6 +449,20 @@ export const am = {
     confirm: 'አረጋግጥ',
     close: 'ዝጋ',
     language: 'ቋንቋ',
+  },
+  validation: {
+    required: 'ይህ መስክ ያስፈልጋል',
+    minLength: 'በጣም 짧음',
+    maxLength: 'በጣም ረጅም',
+    invalidEmail: 'ትክክል ያልሆነ ኢሜይል',
+    invalidPhone: 'ትክክል ያልሆነ ስልክ ቁጥር',
+    invalidAmount: 'ቁጥር ብቻ ይጠቀሙ',
+  },
+  formHelp: {
+    reportTitle: 'አጭር ርዕስ። ምሳሌ: "ሪሴቻ ሒደተ ሪሴቻ" ወይም "ጫና እንደገና አልጠበቁ"። ቃላት 5-15።',
+    reportDescription: 'ሙሉ ታሪክ ተናገር። አካትት: ምን ተከስተ? መቼ? የት? ማን? ስንት ገንዘብ? ለምን ልክ ያልሆነ ነው?',
+    reportOffice: 'ምን ቢሮ፣ ኤጀንሲ ወይም ኦፊሴር ተሳትፎ ነው?',
+    reportAmount: 'ግምታዊ መጠን (ቁጥር ብቻ)። ካልታወቀ "skip" ይተይቡ።',
   },
 };
 
@@ -449,6 +533,20 @@ export const ha = {
     close: 'Rufe',
     language: 'Harshe',
   },
+  validation: {
+    required: 'Aiki nan ya bukaci',
+    minLength: 'Ya yi gajarta (karin bayani)',
+    maxLength: 'Ya dadi (karshegi)',
+    invalidEmail: 'Email bai dace ba',
+    invalidPhone: 'Namba simu bai dace ba',
+    invalidAmount: 'Jiri lambobi kawai',
+  },
+  formHelp: {
+    reportTitle: 'Gajeren take. Misali: "An karba ba" ko "Budurewar badata ba a gyara ba shekara 2". Aiki ɗaya 5-15.',
+    reportDescription: 'Bayyana cikakken labari. Ciki: Me ya faru? Yaushe? Ina? Wa suka shiga? Kimanin kudi? Me yake sa ka ce bai dace ba?',
+    reportOffice: 'Wane ofis, hukuma, ko jami ba a shafe?',
+    reportAmount: 'Kimanin kudi (lambobi kawai). Idan ba ka san, ka rubuta "skip".',
+  },
 };
 
 // Yoruba
@@ -518,6 +616,20 @@ export const yo = {
     close: 'Pa',
     language: 'Ede',
   },
+  validation: {
+    required: 'Awo yii ni dee',
+    minLength: 'Kukuru ju (kera alaaye)',
+    maxLength: 'Gigun ju (kera ko punilo)',
+    invalidEmail: 'Imeeli ko pe',
+    invalidPhone: 'Nomba fon ko pe',
+    invalidAmount: 'Lo nomba nikan',
+  },
+  formHelp: {
+    reportTitle: 'Akole kukuru. Apoile: "A gba owo" tabi "Okporo ko fi ndi iye tuntun". Ede 5-15.',
+    reportDescription: 'So itan pipe. Pelu: Ohun ti sele? Nigbawo? Ibi? Tani? Iye ole? Kilode lo ji pe ko dara?',
+    reportOffice: 'Ofis, agency, tabi official wo lo kan?',
+    reportAmount: 'Isiro iye owo (nomba nikan). Ti o ba mo, ko "skip".',
+  },
 };
 
 // Igbo
@@ -586,5 +698,19 @@ export const ig = {
     confirm: 'Kwenye',
     close: 'Mechie',
     language: 'Asusu',
+  },
+  validation: {
+    required: 'A nokwa efu',
+    minLength: 'Obaghi ogologo (ihe ihe ochọ least)',
+    maxLength: 'Abaghi ogologo (too many)',
+    invalidEmail: 'Eluigwe ok diri',
+    invalidPhone: 'Namba ekwesighị',
+    invalidAmount: 'Jiri nomba naanị',
+  },
+  formHelp: {
+    reportTitle: 'Isiokwu mkpirikpi. Ihe atụ: "A natara ego" ma obu "Okporo ụzọ na-ubịa". Okwu 5-15.',
+    reportDescription: 'Kowa akụkọ zuru. Tinye: Kedụ ihe mere? Kaodu? Eebe? Onye? Ego ole? Gini keem gi na ọ dịghị mma?',
+    reportOffice: 'Ofis government, agency, ma obu onye isi metutara ya',
+    reportAmount: 'Ego ole (nomba naanị). Ọ bụrụ na i maghị, dee "skip".',
   },
 };
