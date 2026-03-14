@@ -1,4 +1,4 @@
-import PDFDocument from 'pdfkit'
+﻿import PDFDocument from 'pdfkit'
 import type { Readable } from 'stream'
 import type { IReport, IEvidence, IVerification } from '../models'
 
@@ -146,7 +146,8 @@ export async function generateReportPDF(
       const pageCount = doc.bufferedPageRange().count
       for (let i = 0; i < pageCount; i++) {
         doc.switchToPage(i)
-        doc.fontSize(8).fillColor('#999').text(`Page ${i + 1} of ${pageCount}`, 50, 750, {
+        const footerY = doc.page.height - Math.max(30, doc.page.margins.bottom)
+        doc.fontSize(8).fillColor('#999').text(`Page ${i + 1} of ${pageCount}`, 50, footerY, {
           align: 'center',
         })
       }
@@ -263,7 +264,7 @@ export async function generateAnalyticsPDF(
         doc.fontSize(10).font('Helvetica')
 
         Object.entries(analytics.reportsByType).forEach(([type, count]) => {
-          doc.text(`  • ${type}: ${count}`)
+          doc.text(`  - ${type}: ${count}`)
         })
 
         doc.moveDown(2)
@@ -275,7 +276,7 @@ export async function generateAnalyticsPDF(
         doc.fontSize(10).font('Helvetica')
 
         Object.entries(analytics.reportsByStatus).forEach(([status, count]) => {
-          doc.text(`  • ${status}: ${count}`)
+          doc.text(`  - ${status}: ${count}`)
         })
 
         doc.moveDown(2)
@@ -298,3 +299,4 @@ export async function generateAnalyticsPDF(
     }
   })
 }
+
