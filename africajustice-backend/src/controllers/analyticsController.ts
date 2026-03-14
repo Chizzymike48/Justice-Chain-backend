@@ -5,7 +5,10 @@ import { Verification } from '../models/Verification'
 import { AuthRequest } from '../middleware/auth'
 import { getOrCompute, generateCacheKey, CACHE_TTL } from '../services/cacheService'
 
-export const getDashboardMetricsController = async (req: AuthRequest, res: Response) => {
+export const getDashboardMetricsController = async (
+  req: AuthRequest,
+  res: Response
+): Promise<Response> => {
   try {
     const cacheKey = generateCacheKey('dashboard', 'metrics')
     
@@ -44,7 +47,10 @@ export const getDashboardMetricsController = async (req: AuthRequest, res: Respo
   }
 }
 
-export const getDistrictAnalyticsController = async (req: AuthRequest, res: Response) => {
+export const getDistrictAnalyticsController = async (
+  req: AuthRequest,
+  res: Response
+): Promise<Response> => {
   try {
     const cacheKey = generateCacheKey('analytics', 'district-performance')
     
@@ -109,7 +115,10 @@ export const getDistrictAnalyticsController = async (req: AuthRequest, res: Resp
   }
 }
 
-export const getReportAnalyticsController = async (req: AuthRequest, res: Response) => {
+export const getReportAnalyticsController = async (
+  req: AuthRequest,
+  res: Response
+): Promise<Response> => {
   try {
     const { category, status } = req.query as { category?: string; status?: string }
 

@@ -30,7 +30,7 @@ const RECORDING_PUBLIC_BASE = (process.env.RECORDINGS_PUBLIC_BASE || '/recording
 const THUMBNAILS_PUBLIC_BASE = (process.env.THUMBNAILS_PUBLIC_BASE || '/thumbnails').replace(/\/+$/, '')
 
 // Ensure directories exist
-const ensureDirectories = () => {
+const ensureDirectories = (): void => {
   if (!fs.existsSync(RECORDING_DIR)) {
     fs.mkdirSync(RECORDING_DIR, { recursive: true })
   }
@@ -247,7 +247,7 @@ const generateThumbnail = (streamId: string, recordingId: string): void => {
   console.log(`Thumbnail generated: ${thumbnailFilePath}`)
 }
 
-const recordViewerAnalytics = (streamId: string, action: 'joined' | 'left', ws: WebSocket): void => {
+const recordViewerAnalytics = (streamId: string, action: 'joined' | 'left', _ws: WebSocket): void => {
   const session = activeSessions.get(streamId)
   if (!session) return
 

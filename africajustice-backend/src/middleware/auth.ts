@@ -1,4 +1,4 @@
-import { NextFunction, Request, Response } from 'express'
+import { NextFunction, Response } from 'express'
 import jwt, { JwtPayload } from 'jsonwebtoken'
 import { captureError, addBreadcrumb } from '../config/sentry'
 import type { AuthRequest } from '../types'

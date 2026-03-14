@@ -58,11 +58,11 @@ const errorHandler = (
   err: ErrorResponse,
   req: Request,
   res: Response,
-  next: NextFunction
+  _next: NextFunction
 ): void => {
   const statusCode = err.statusCode || 500
   const category = categorizeError(err)
-  const requestId = (req as any).id || 'unknown'
+  const requestId = (req as { id?: string }).id || 'unknown'
 
   // Add breadcrumb for error context
   addBreadcrumb('Error occurred', 'error', 'error', {
@@ -115,7 +115,14 @@ const errorHandler = (
   }
 
   // Send error response
-  const response: any = {
+  const response: {
+    success: boolean
+    message: string
+    error?: string
+    category?: ErrorCategory
+    requestId: string
+    retryAfter?: number
+  } = {
     success: false,
     message: err.message || 'An error occurred',
     error: process.env.NODE_ENV === 'development' ? err.stack : undefined,
@@ -134,11 +141,11 @@ const errorHandler = (
 /**
  * Sanitize request body to remove sensitive information
  */
-function sanitizeBody(body: any): any {
-  if (!body) return body
+function sanitizeBody(body: unknown): unknown {
+  if (!body || typeof body !== 'object' || Array.isArray(body)) return body
 
   const sensitiveFields = ['password', 'token', 'secret', 'apiKey', 'authorization']
-  const sanitized = { ...body }
+  const sanitized: Record<string, unknown> = { ...(body as Record<string, unknown>) }
 
   sensitiveFields.forEach(field => {
     if (field in sanitized) {

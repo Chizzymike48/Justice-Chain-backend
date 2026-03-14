@@ -1,5 +1,5 @@
 import http from 'http'
-import { Server, Socket } from 'socket.io'
+import { Server } from 'socket.io'
 import { createClient, RedisClientType } from 'redis'
 import { createAdapter } from '@socket.io/redis-adapter'
 import app from './app'
@@ -24,8 +24,8 @@ setSocketServer(io)
 registerSocketHandlers(io)
 
 interface SocketAdapterClients {
-  pubClient: any
-  subClient: any
+  pubClient: RedisClientType
+  subClient: RedisClientType
 }
 
 const setupSocketAdapter = async (): Promise<SocketAdapterClients | null> => {
@@ -46,8 +46,8 @@ const setupSocketAdapter = async (): Promise<SocketAdapterClients | null> => {
     ? { url: redisUrl, socket: { connectTimeout: 5000 }, ...(password ? { password } : {}) }
     : { socket: { host, port, connectTimeout: 5000 }, ...(password ? { password } : {}) }
 
-  const pubClient: any = createClient(clientOptions)
-  const subClient: any = pubClient.duplicate()
+  const pubClient: RedisClientType = createClient(clientOptions)
+  const subClient: RedisClientType = pubClient.duplicate()
 
   try {
     // Connect with timeout

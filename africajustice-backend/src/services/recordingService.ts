@@ -17,6 +17,17 @@ export interface CreateRecordingPayload {
   fileSize?: number
 }
 
+export interface RecordingAnalytics {
+  duration: number
+  frameCount: number
+  viewerCount?: number
+  peakViewers?: number
+  quality?: 'low' | 'medium' | 'high'
+  fileSize?: number
+  startedAt: Date
+  endedAt: Date
+}
+
 export const recordingService = {
   createRecording: async (payload: CreateRecordingPayload): Promise<IStreamRecording> => {
     const recording = await StreamRecording.create({
@@ -84,7 +95,7 @@ export const recordingService = {
       .limit(limit)
   },
 
-  getAnalytics: async (streamId: string): Promise<any> => {
+  getAnalytics: async (streamId: string): Promise<RecordingAnalytics | null> => {
     const recording = await StreamRecording.findOne({ streamId })
     if (!recording) return null
 

@@ -1,8 +1,11 @@
-import { Response } from 'express'
+import { Request, Response } from 'express'
 import { Petition } from '../models/Petition'
 import { AuthRequest } from '../middleware/auth'
 
-export const createPetitionController = async (req: AuthRequest, res: Response) => {
+export const createPetitionController = async (
+  req: AuthRequest,
+  res: Response
+): Promise<Response> => {
   try {
     const { title, description } = req.body as {
       title?: string
@@ -37,7 +40,7 @@ export const createPetitionController = async (req: AuthRequest, res: Response) 
   }
 }
 
-export const getPetitionsController = async (req: any, res: Response) => {
+export const getPetitionsController = async (req: Request, res: Response): Promise<Response> => {
   try {
     const queryLimit = req.query.limit as string | undefined
     const querySkip = req.query.skip as string | undefined
@@ -74,7 +77,7 @@ export const getPetitionsController = async (req: any, res: Response) => {
   }
 }
 
-export const getPetitionByIdController = async (req: any, res: Response) => {
+export const getPetitionByIdController = async (req: Request, res: Response): Promise<Response> => {
   try {
     const { id } = req.params
     const petition = await Petition.findById(id)
@@ -99,7 +102,10 @@ export const getPetitionByIdController = async (req: any, res: Response) => {
   }
 }
 
-export const signPetitionController = async (req: AuthRequest, res: Response) => {
+export const signPetitionController = async (
+  req: AuthRequest,
+  res: Response
+): Promise<Response> => {
   try {
     const { id } = req.params
 
@@ -129,7 +135,10 @@ export const signPetitionController = async (req: AuthRequest, res: Response) =>
   }
 }
 
-export const updatePetitionStatusController = async (req: AuthRequest, res: Response) => {
+export const updatePetitionStatusController = async (
+  req: AuthRequest,
+  res: Response
+): Promise<Response> => {
   try {
     const { id } = req.params
     const { status } = req.body as { status?: string }

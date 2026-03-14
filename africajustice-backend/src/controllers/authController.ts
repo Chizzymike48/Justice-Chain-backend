@@ -1,10 +1,10 @@
-import { Response } from 'express'
+import { Request, Response } from 'express'
 import bcrypt from 'bcryptjs'
 import jwt, { SignOptions } from 'jsonwebtoken'
 import { User } from '../models/User'
 import { AuthRequest } from '../middleware/auth'
 
-export const registerController = async (req: any, res: Response) => {
+export const registerController = async (req: Request, res: Response): Promise<Response> => {
   try {
     const { email, password, name, role, preferredLanguage } = req.body as {
       email?: string
@@ -78,7 +78,7 @@ export const registerController = async (req: any, res: Response) => {
   }
 }
 
-export const loginController = async (req: any, res: Response) => {
+export const loginController = async (req: Request, res: Response): Promise<Response> => {
   try {
     const { email, password, preferredLanguage } = req.body as {
       email?: string
@@ -165,7 +165,7 @@ export const loginController = async (req: any, res: Response) => {
   }
 }
 
-export const logoutController = async (req: AuthRequest, res: Response) => {
+export const logoutController = async (req: AuthRequest, res: Response): Promise<Response> => {
   // JWT doesn't require explicit logout on backend
   // Client should remove token from storage
   return res.json({
@@ -174,7 +174,10 @@ export const logoutController = async (req: AuthRequest, res: Response) => {
   })
 }
 
-export const getCurrentUserController = async (req: AuthRequest, res: Response) => {
+export const getCurrentUserController = async (
+  req: AuthRequest,
+  res: Response
+): Promise<Response> => {
   try {
     if (!req.user) {
       return res.status(401).json({

@@ -1,4 +1,5 @@
 import sgMail from '@sendgrid/mail'
+import type { MailDataRequired } from '@sendgrid/helpers/classes/mail'
 import { captureError, addBreadcrumb } from '../config/sentry'
 
 /**
@@ -55,7 +56,7 @@ export const sendEmail = async (options: EmailOptions): Promise<boolean> => {
 
     const senderEmail = process.env.SENDGRID_FROM_EMAIL || 'noreply@africajustice.com'
 
-    const msg: any = {
+    const msg: MailDataRequired = {
       to,
       from: senderEmail,
       subject,
@@ -264,4 +265,3 @@ function stripHtmlTags(html: string): string {
 
 // Initialize SendGrid on module load
 initializeSendGrid()
-

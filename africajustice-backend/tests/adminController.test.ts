@@ -22,7 +22,7 @@ describe('Admin Controller', () => {
       query: {},
       body: {},
       params: {},
-      user: { id: 'admin-123', email: 'admin@example.com', role: 'admin' } as any,
+      user: { id: 'admin-123', email: 'admin@example.com', role: 'admin' } as AuthRequest['user'],
     }
     res = {
       json: jest.fn().mockReturnThis(),
@@ -32,25 +32,23 @@ describe('Admin Controller', () => {
 
   describe('getAdminDashboardController', () => {
     it('should return dashboard statistics', async () => {
-      const mockStats = {
-        reports: { total: 10, pending: 3 },
-        verifications: { total: 5, pending: 2 },
-        evidence: { total: 20, pending: 5 },
-        users: { total: 100, admins: 2, moderators: 5 },
-      }
+      const reportCountMock = Report.countDocuments as jest.Mock
+      const verificationCountMock = Verification.countDocuments as jest.Mock
+      const evidenceCountMock = Evidence.countDocuments as jest.Mock
+      const userCountMock = User.countDocuments as jest.Mock
 
-      ;(Report.countDocuments as jest.Mock).mockResolvedValue(10)
-      ;(Report.countDocuments as jest.Mock)
+      reportCountMock.mockResolvedValue(10)
+      reportCountMock
         .mockResolvedValueOnce(10)
         .mockResolvedValueOnce(3)
-      ;(Verification.countDocuments as jest.Mock)
+      verificationCountMock
         .mockResolvedValueOnce(5)
         .mockResolvedValueOnce(2)
-      ;(Evidence.countDocuments as jest.Mock).mockResolvedValueOnce(20)
-      ;(Evidence.countDocuments as jest.Mock).mockResolvedValueOnce(5)
-      ;(User.countDocuments as jest.Mock).mockResolvedValueOnce(100)
-      ;(User.countDocuments as jest.Mock).mockResolvedValueOnce(2)
-      ;(User.countDocuments as jest.Mock).mockResolvedValueOnce(5)
+      evidenceCountMock.mockResolvedValueOnce(20)
+      evidenceCountMock.mockResolvedValueOnce(5)
+      userCountMock.mockResolvedValueOnce(100)
+      userCountMock.mockResolvedValueOnce(2)
+      userCountMock.mockResolvedValueOnce(5)
 
       await adminController.getAdminDashboardController(
         req as AuthRequest,
@@ -223,7 +221,7 @@ describe('Admin Controller', () => {
 
       req.params = { id: 'user-123' }
       req.body = { role: 'moderator' }
-      req.user = { id: 'admin-456', email: 'admin@example.com', role: 'admin' } as any
+      req.user = { id: 'admin-456', email: 'admin@example.com', role: 'admin' } as AuthRequest['user']
 
       ;(User.findById as jest.Mock).mockResolvedValue(mockUser)
 
@@ -244,7 +242,7 @@ describe('Admin Controller', () => {
     it('should prevent self-demotion', async () => {
       req.params = { id: 'admin-123' }
       req.body = { role: 'citizen' }
-      req.user = { id: 'admin-123', email: 'admin@example.com', role: 'admin' } as any
+      req.user = { id: 'admin-123', email: 'admin@example.com', role: 'admin' } as AuthRequest['user']
 
       ;(User.findById as jest.Mock).mockResolvedValue({
         _id: 'admin-123',

@@ -1,4 +1,5 @@
 import { Server, Socket } from 'socket.io'
+import type { WebSocket } from 'ws'
 import livestreamService from '../services/livestreamService'
 import { LiveStream } from '../models/LiveStream'
 import { verifyToken } from '../middleware/auth'
@@ -83,7 +84,7 @@ export const setupLiveStreamHandler = (io: Server): void => {
     socket.join(`stream-${streamId}`)
 
     // Add viewer to stream
-    livestreamService.addViewer(streamId, socket as any)
+    livestreamService.addViewer(streamId, socket as unknown as WebSocket)
 
     // Send initial viewer count
     socket.emit('viewer-count', {
@@ -149,7 +150,7 @@ export const setupLiveStreamHandler = (io: Server): void => {
 
     // Handle disconnect
     socket.on('disconnect', () => {
-      livestreamService.removeViewer(streamId, socket as any)
+      livestreamService.removeViewer(streamId, socket as unknown as WebSocket)
 
       // If streamer disconnects, end the stream
       if (session.userId === userId) {

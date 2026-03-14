@@ -1,17 +1,18 @@
 import { Request, Response, Router } from 'express'
-import mongoose from 'mongoose'
+import mongoose, { type HydratedDocument } from 'mongoose'
 import { authMiddleware } from '../middleware/auth'
 import type { AuthRequest } from '../types'
 import { auditWriteAction } from '../middleware/audit'
 import { validateRequest } from '../middleware/validation'
 import { createLiveStreamValidator } from '../validators/livestreamValidators'
-import { LiveStream } from '../models/LiveStream'
+import { LiveStream, type ILiveStream } from '../models/LiveStream'
 import livestreamService from '../services/livestreamService'
 import recordingService from '../services/recordingService'
 
 const router = Router()
+type LiveStreamDocument = HydratedDocument<ILiveStream>
 
-const findStreamByIdentifier = async (id: string) => {
+const findStreamByIdentifier = async (id: string): Promise<LiveStreamDocument | null> => {
   if (mongoose.Types.ObjectId.isValid(id)) {
     return LiveStream.findOne({ $or: [{ _id: id }, { streamId: id }] })
   }

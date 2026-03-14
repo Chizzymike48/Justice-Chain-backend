@@ -1,4 +1,4 @@
-import { Response } from 'express'
+import { Request, Response } from 'express'
 import { Evidence } from '../models/Evidence'
 import { AuthRequest } from '../middleware/auth'
 import { s3Service } from '../services/s3Service'
@@ -10,7 +10,10 @@ import { getSocketServer } from '../socket/socketRegistry'
  * Get presigned URL for direct S3 upload
  * Client gets a presigned URL and uploads directly to S3, reducing server bandwidth
  */
-export const getPresignedUploadUrlController = async (req: AuthRequest, res: Response) => {
+export const getPresignedUploadUrlController = async (
+  req: AuthRequest,
+  res: Response
+): Promise<Response> => {
   try {
     const { fileName, contentType } = req.body as {
       fileName?: string
@@ -51,7 +54,10 @@ export const getPresignedUploadUrlController = async (req: AuthRequest, res: Res
  * Upload evidence with file (from form-data)
  * Server handles upload to S3, virus scanning, and indexing
  */
-export const uploadEvidenceController = async (req: AuthRequest, res: Response) => {
+export const uploadEvidenceController = async (
+  req: AuthRequest,
+  res: Response
+): Promise<Response> => {
   const uploadStartTime = Date.now()
   
   try {
@@ -82,14 +88,14 @@ export const uploadEvidenceController = async (req: AuthRequest, res: Response) 
       status: 'uploading',
       mimeType: req.file.mimetype,
       fileSize: req.file.size,
-      uploadedBy: (req.user as any)?.email || 'unknown',
+      uploadedBy: req.user?.email || 'unknown',
       uploadProgress: 10, // Starting progress
     })
 
     const socketEvents = initializeUploadEvents(getSocketServer())
 
     // Emit upload started
-    socketEvents.emitUploadStarted((req.user as any)?.id, {
+    socketEvents.emitUploadStarted(req.user?.id || 'unknown', {
       evidenceId: evidence._id.toString(),
       fileName: req.file.originalname,
       fileSize: req.file.size,
@@ -97,7 +103,7 @@ export const uploadEvidenceController = async (req: AuthRequest, res: Response) 
 
     try {
       // Step 1: Virus scan
-      socketEvents.emitVirusScanStarted((req.user as any)?.id, {
+      socketEvents.emitVirusScanStarted(req.user?.id || 'unknown', {
         evidenceId: evidence._id.toString(),
         fileName: req.file.originalname,
       })
@@ -117,7 +123,7 @@ export const uploadEvidenceController = async (req: AuthRequest, res: Response) 
         evidence.status = 'rejected'
         await evidence.save()
 
-        socketEvents.emitVirusScanCompleted((req.user as any)?.id, {
+        socketEvents.emitVirusScanCompleted(req.user?.id || 'unknown', {
           evidenceId: evidence._id.toString(),
           fileName: req.file.originalname,
           clean: false,
@@ -125,7 +131,7 @@ export const uploadEvidenceController = async (req: AuthRequest, res: Response) 
           scanTime: scanResult.scanTime,
         })
 
-        socketEvents.emitUploadFailed((req.user as any)?.id, {
+        socketEvents.emitUploadFailed(req.user?.id || 'unknown', {
           evidenceId: evidence._id.toString(),
           fileName: req.file.originalname,
           error: `Malware detected: ${scanResult.threat}`,
@@ -140,7 +146,7 @@ export const uploadEvidenceController = async (req: AuthRequest, res: Response) 
       }
 
       // Emit scan completed
-      socketEvents.emitVirusScanCompleted((req.user as any)?.id, {
+      socketEvents.emitVirusScanCompleted(req.user?.id || 'unknown', {
         evidenceId: evidence._id.toString(),
         fileName: req.file.originalname,
         clean: true,
@@ -175,7 +181,7 @@ export const uploadEvidenceController = async (req: AuthRequest, res: Response) 
       const uploadTime = Date.now() - uploadStartTime
 
       // Emit upload completed
-      socketEvents.emitUploadCompleted((req.user as any)?.id, {
+      socketEvents.emitUploadCompleted(req.user?.id || 'unknown', {
         evidenceId: evidence._id.toString(),
         fileName: req.file.originalname,
         s3Url: s3Result.url,
@@ -188,7 +194,7 @@ export const uploadEvidenceController = async (req: AuthRequest, res: Response) 
         evidenceId: evidence._id.toString(),
         caseId,
         fileName: req.file.originalname,
-        uploadedBy: (req.user as any)?.email || 'unknown',
+        uploadedBy: req.user?.email || 'unknown',
         uploadedAt: new Date(),
       })
 
@@ -205,7 +211,7 @@ export const uploadEvidenceController = async (req: AuthRequest, res: Response) 
       evidence.uploadProgress = 0
       await evidence.save()
 
-      socketEvents.emitUploadFailed((req.user as any)?.id, {
+      socketEvents.emitUploadFailed(req.user?.id || 'unknown', {
         evidenceId: evidence._id.toString(),
         fileName: req.file.originalname,
         error: 'Upload to S3 failed',
@@ -227,7 +233,7 @@ export const uploadEvidenceController = async (req: AuthRequest, res: Response) 
   }
 }
 
-export const getEvidenceController = async (req: any, res: Response) => {
+export const getEvidenceController = async (req: Request, res: Response): Promise<Response> => {
   try {
     const queryLimit = req.query.limit as string | undefined
     const querySkip = req.query.skip as string | undefined
@@ -266,7 +272,7 @@ export const getEvidenceController = async (req: any, res: Response) => {
   }
 }
 
-export const getEvidenceByIdController = async (req: any, res: Response) => {
+export const getEvidenceByIdController = async (req: Request, res: Response): Promise<Response> => {
   try {
     const { id } = req.params
     const evidence = await Evidence.findById(id)
@@ -291,7 +297,10 @@ export const getEvidenceByIdController = async (req: any, res: Response) => {
   }
 }
 
-export const updateEvidenceStatusController = async (req: AuthRequest, res: Response) => {
+export const updateEvidenceStatusController = async (
+  req: AuthRequest,
+  res: Response
+): Promise<Response> => {
   try {
     const { id } = req.params
     const { status } = req.body as { status?: string }
@@ -328,7 +337,10 @@ export const updateEvidenceStatusController = async (req: AuthRequest, res: Resp
 /**
  * Download evidence file (generates signed URL)
  */
-export const downloadEvidenceController = async (req: AuthRequest, res: Response) => {
+export const downloadEvidenceController = async (
+  req: AuthRequest,
+  res: Response
+): Promise<Response> => {
   try {
     const { id } = req.params
 
@@ -366,7 +378,10 @@ export const downloadEvidenceController = async (req: AuthRequest, res: Response
 /**
  * Delete evidence file from S3
  */
-export const deleteEvidenceController = async (req: AuthRequest, res: Response) => {
+export const deleteEvidenceController = async (
+  req: AuthRequest,
+  res: Response
+): Promise<Response> => {
   try {
     const { id } = req.params
 

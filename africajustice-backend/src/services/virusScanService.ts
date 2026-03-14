@@ -76,7 +76,7 @@ export class VirusScanService {
     console.log(`[VirusScan] Mock scan for: ${fileName} (${fileBuffer.length} bytes)`)
     
     // Simulate scan time
-    const scanTime = Math.random() * 100
+    const scanTime = Date.now() - startTime + Math.random() * 100
 
     // Check for test virus signatures (EICAR test file)
     const content = fileBuffer.toString()
@@ -145,8 +145,14 @@ export class VirusScanService {
 
       if (maliciousCount > 0) {
         const threats = Object.entries(detectionResults)
-          .filter(([_, result]: [string, any]) => result.category === 'malicious')
-          .map(([engine, result]: [string, any]) => `${engine}: ${result.result}`)
+          .filter(([_, result]) => {
+            const detection = result as { category?: string }
+            return detection.category === 'malicious'
+          })
+          .map(([engine, result]) => {
+            const detection = result as { result?: string }
+            return `${engine}: ${detection.result || 'malicious'}`
+          })
           .slice(0, 3)
 
         return {

@@ -1,5 +1,6 @@
 import { Response } from 'express'
 import type { IAuthRequest } from '../types'
+import type { IReport, IEvidence, IVerification } from '../models'
 import { Report, Evidence, Verification } from '../models'
 import { generateReportPDF, generateBulkReportsPDF, generateAnalyticsPDF } from '../services/pdfExportService'
 import {
@@ -10,6 +11,41 @@ import {
   generateComprehensiveCSV,
 } from '../services/csvExportService'
 import { captureError, addBreadcrumb } from '../config/sentry'
+
+type ReportRecord = IReport & { _id: string }
+type EvidenceRecord = IEvidence & { _id: string; reportId?: string }
+type VerificationRecord = IVerification & { _id: string; reportId?: string }
+
+type DateRangeQuery = { createdAt?: { $gte?: Date; $lte?: Date } }
+type QueryWithDate = DateRangeQuery & { [key: string]: unknown }
+
+const toReportRecord = (report: IReport & { _id: unknown }): ReportRecord => {
+  const reportObj = (report as { toObject?: () => IReport }).toObject?.() ?? report
+  return {
+    ...reportObj,
+    _id: String(report._id),
+  }
+}
+
+const toEvidenceRecord = (evidence: IEvidence & { _id: unknown }): EvidenceRecord => {
+  const evidenceObj = (evidence as { toObject?: () => IEvidence }).toObject?.() ?? evidence
+  return {
+    ...evidenceObj,
+    _id: String(evidence._id),
+    reportId: evidenceObj.caseId,
+  }
+}
+
+const toVerificationRecord = (
+  verification: IVerification & { _id: unknown }
+): VerificationRecord => {
+  const verificationObj =
+    (verification as { toObject?: () => IVerification }).toObject?.() ?? verification
+  return {
+    ...verificationObj,
+    _id: String(verification._id),
+  }
+}
 
 /**
  * Export single report as PDF
@@ -37,9 +73,9 @@ export async function exportReportAsPDF(req: IAuthRequest, res: Response): Promi
 
     // Generate PDF
     const pdfStream = await generateReportPDF({
-      report: report as any,
-      evidence: evidence as any,
-      verifications: verifications as any,
+      report: toReportRecord(report),
+      evidence: evidence.map(toEvidenceRecord),
+      verifications: verifications.map(toVerificationRecord),
     })
 
     // Set response headers
@@ -65,11 +101,11 @@ export async function exportReportsAsPDF(req: IAuthRequest, res: Response): Prom
 
     addBreadcrumb('Bulk export reports as PDF', 'export', 'info', { count: requestReportIds.length })
 
-    let query: any = {}
+    let query: QueryWithDate = {}
     if (requestReportIds.length > 0) {
       query._id = { $in: requestReportIds }
     } else if (Object.keys(filters).length > 0) {
-      query = filters
+      query = filters as Record<string, unknown>
     }
 
     // Fetch reports with pagination limit (max 100)
@@ -82,29 +118,30 @@ export async function exportReportsAsPDF(req: IAuthRequest, res: Response): Prom
     }
 
     // Fetch associated data in bulk (avoid N+1 queries)
-    const reportIdList = reports.map(r => r._id || r.id)
+    const reportIdList = reports.map((r) => String(r._id))
     const [allEvidence] = await Promise.all([
       Evidence.find({ caseId: { $in: reportIdList } })
     ])
 
     // Group evidence by reportId
-    const evidenceMap = new Map<string, any[]>()
+    const evidenceMap = new Map<string, EvidenceRecord[]>()
     
-    allEvidence.forEach(e => {
+    allEvidence.forEach((e) => {
       const key = String(e.caseId)
       if (!evidenceMap.has(key)) evidenceMap.set(key, [])
-      evidenceMap.get(key)!.push(e)
+      evidenceMap.get(key)!.push(toEvidenceRecord(e))
     })
 
     // Build reports with mapped data
-    const reportsWithData = reports.map(report => ({
-      report: report as any,
-      evidence: evidenceMap.get(String(report._id || report.id)) || []
+    const reportsWithData = reports.map((report) => ({
+      report: toReportRecord(report),
+      evidence: evidenceMap.get(String(report._id)) || [],
+      verifications: [] as VerificationRecord[],
     }))
 
     // Generate PDF
     const pdfStream = await generateBulkReportsPDF(
-      reportsWithData.map((d: any) => d.report)
+      reportsWithData
     )
 
     res.setHeader('Content-Type', 'application/pdf')
@@ -129,11 +166,11 @@ export async function exportReportsAsCSV(req: IAuthRequest, res: Response): Prom
 
     addBreadcrumb('Export reports as CSV', 'export', 'info')
 
-    let query: any = {}
+    let query: QueryWithDate = {}
     if (reportIds.length > 0) {
       query._id = { $in: reportIds }
     } else if (Object.keys(filters).length > 0) {
-      query = filters
+      query = filters as Record<string, unknown>
     }
 
     // Add date range if provided
@@ -150,7 +187,7 @@ export async function exportReportsAsCSV(req: IAuthRequest, res: Response): Prom
       return
     }
 
-    const csv = generateReportsCSV(reports as any)
+    const csv = generateReportsCSV(reports.map(toReportRecord))
 
     res.setHeader('Content-Type', 'text/csv; charset=utf-8')
     res.setHeader('Content-Disposition', `attachment; filename="reports-${Date.now()}.csv"`)
@@ -174,7 +211,7 @@ export async function exportEvidenceAsCSV(req: IAuthRequest, res: Response): Pro
 
     addBreadcrumb('Export evidence as CSV', 'export', 'info')
 
-    const query: any = {}
+    const query: QueryWithDate = {}
     if (reportId) {
       query.reportId = reportId
     }
@@ -192,7 +229,7 @@ export async function exportEvidenceAsCSV(req: IAuthRequest, res: Response): Pro
       return
     }
 
-    const csv = generateEvidenceCSV(evidence as any)
+    const csv = generateEvidenceCSV(evidence.map(toEvidenceRecord))
 
     res.setHeader('Content-Type', 'text/csv; charset=utf-8')
     res.setHeader('Content-Disposition', `attachment; filename="evidence-${Date.now()}.csv"`)
@@ -216,7 +253,7 @@ export async function exportVerificationsAsCSV(req: IAuthRequest, res: Response)
 
     addBreadcrumb('Export verifications as CSV', 'export', 'info')
 
-    const query: any = {}
+    const query: QueryWithDate = {}
     if (reportId) {
       query.reportId = reportId
     }
@@ -234,7 +271,7 @@ export async function exportVerificationsAsCSV(req: IAuthRequest, res: Response)
       return
     }
 
-    const csv = generateVerificationsCSV(verifications as any)
+    const csv = generateVerificationsCSV(verifications.map(toVerificationRecord))
 
     res.setHeader('Content-Type', 'text/csv; charset=utf-8')
     res.setHeader('Content-Disposition', `attachment; filename="verifications-${Date.now()}.csv"`)
@@ -258,7 +295,7 @@ export async function exportComprehensiveCSV(req: IAuthRequest, res: Response): 
 
     addBreadcrumb('Export comprehensive data', 'export', 'info')
 
-    const reportQuery: any = {}
+    const reportQuery: QueryWithDate = {}
     if (reportIds.length > 0) {
       reportQuery._id = { $in: reportIds }
     }
@@ -277,9 +314,9 @@ export async function exportComprehensiveCSV(req: IAuthRequest, res: Response): 
     ])
 
     const csv = generateComprehensiveCSV({
-      reports: reports as any,
-      evidence: evidence as any,
-      verifications: verifications as any,
+      reports: reports.map(toReportRecord),
+      evidence: evidence.map(toEvidenceRecord),
+      verifications: verifications.map(toVerificationRecord),
     })
 
     res.setHeader('Content-Type', 'text/csv; charset=utf-8')
@@ -308,7 +345,7 @@ export async function exportAnalyticsAsPDF(req: IAuthRequest, res: Response): Pr
 
     addBreadcrumb('Export analytics as PDF', 'export', 'info')
 
-    const dateQuery: any = {}
+    const dateQuery: QueryWithDate = {}
     if (startDate || endDate) {
       dateQuery.createdAt = {}
       if (startDate) dateQuery.createdAt.$gte = new Date(String(startDate))
@@ -323,8 +360,9 @@ export async function exportAnalyticsAsPDF(req: IAuthRequest, res: Response): Pr
     const reportsByType: { [key: string]: number } = {}
     const reportsByStatus: { [key: string]: number } = {}
 
-    reports.forEach((report: any) => {
-      reportsByType[report.type || 'Unknown'] = (reportsByType[report.type || 'Unknown'] || 0) + 1
+    reports.forEach((report) => {
+      const reportType = (report as IReport & { type?: string }).type || 'Unknown'
+      reportsByType[reportType] = (reportsByType[reportType] || 0) + 1
       reportsByStatus[report.status || 'Unknown'] =
         (reportsByStatus[report.status || 'Unknown'] || 0) + 1
     })
@@ -362,7 +400,7 @@ export async function exportAnalyticsAsCSV(req: IAuthRequest, res: Response): Pr
 
     addBreadcrumb('Export analytics as CSV', 'export', 'info')
 
-    const dateQuery: any = {}
+    const dateQuery: QueryWithDate = {}
     if (startDate || endDate) {
       dateQuery.createdAt = {}
       if (startDate) dateQuery.createdAt.$gte = new Date(String(startDate))
@@ -377,8 +415,9 @@ export async function exportAnalyticsAsCSV(req: IAuthRequest, res: Response): Pr
     const reportsByStatus: { [key: string]: number } = {}
     const reportsByOfficer: { [key: string]: number } = {}
 
-    reports.forEach((report: any) => {
-      reportsByType[report.type || 'Unknown'] = (reportsByType[report.type || 'Unknown'] || 0) + 1
+    reports.forEach((report) => {
+      const reportType = (report as IReport & { type?: string }).type || 'Unknown'
+      reportsByType[reportType] = (reportsByType[reportType] || 0) + 1
       reportsByStatus[report.status || 'Unknown'] =
         (reportsByStatus[report.status || 'Unknown'] || 0) + 1
     })
@@ -390,9 +429,9 @@ export async function exportAnalyticsAsCSV(req: IAuthRequest, res: Response): Pr
       reportsByOfficer,
       verificationMetrics: {
         total: verifications.length,
-        approved: verifications.filter((v: any) => v.status === 'approved').length,
-        rejected: verifications.filter((v: any) => v.status === 'rejected').length,
-        pending: verifications.filter((v: any) => v.status === 'pending').length,
+        approved: verifications.filter((v) => v.status === 'reviewed').length,
+        rejected: 0,
+        pending: verifications.filter((v) => v.status === 'pending').length,
       },
       timeSeriesData: [],
     })

@@ -1,8 +1,11 @@
-import { Response } from 'express'
+import { Request, Response } from 'express'
 import { Project } from '../models/Project'
 import { AuthRequest } from '../middleware/auth'
 
-export const createProjectController = async (req: AuthRequest, res: Response) => {
+export const createProjectController = async (
+  req: AuthRequest,
+  res: Response
+): Promise<Response> => {
   try {
     const { title, description, budget, agency, location, status } = req.body as {
       title?: string
@@ -43,7 +46,7 @@ export const createProjectController = async (req: AuthRequest, res: Response) =
   }
 }
 
-export const getProjectsController = async (req: any, res: Response) => {
+export const getProjectsController = async (req: Request, res: Response): Promise<Response> => {
   try {
     const queryLimit = req.query.limit as string | undefined
     const querySkip = req.query.skip as string | undefined
@@ -84,7 +87,7 @@ export const getProjectsController = async (req: any, res: Response) => {
   }
 }
 
-export const getProjectByIdController = async (req: any, res: Response) => {
+export const getProjectByIdController = async (req: Request, res: Response): Promise<Response> => {
   try {
     const { id } = req.params
     const project = await Project.findById(id)
@@ -109,7 +112,10 @@ export const getProjectByIdController = async (req: any, res: Response) => {
   }
 }
 
-export const updateProjectStatusController = async (req: AuthRequest, res: Response) => {
+export const updateProjectStatusController = async (
+  req: AuthRequest,
+  res: Response
+): Promise<Response> => {
   try {
     const { id } = req.params
     const { status, progress } = req.body as {

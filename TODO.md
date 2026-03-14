@@ -1,35 +1,32 @@
-# Fix Login Persistence & Backend Connection Issues - COMPLETE ✅
+# Fix Login Persistence & Backend Connection Issues - Complete
 
-**Frontend login persistence:** Fixed with token validation in AuthContext.tsx
-**Backend startup:** Fixed - graceful without MongoDB (now warns only)
+Status: complete.
 
-## MongoDB Cluster Issue (Separate):
-Atlas cluster DNS/migration corrupted. **Auth works stateless without DB.**
+Frontend login persistence: fixed with token validation in AuthContext.tsx.
+Backend startup: fixed; now starts without MongoDB and only logs a warning.
 
-### Quick Fix Cluster:
-```
-1. MongoDB Atlas → Create NEW free M0 cluster (us-east-1)
+## MongoDB Cluster Issue (Separate)
+Atlas cluster DNS/migration corrupted. Auth works stateless without DB.
+
+### Quick Fix Cluster
+1. MongoDB Atlas -> Create new free M0 cluster (us-east-1)
 2. Add IP 0.0.0.0/0 whitelist
-3. Create user: michaelchizoba5_db_user / 9Qmr5UFg6PHUL34k
-4. Copy NEW mongodb+srv:// URI to .env
+3. Create user: <db_user> / <db_password>
+4. Copy new mongodb+srv:// URI to .env
 5. Delete old cluster
-```
 
-## Local Test Commands:
+## Local Test Commands
 ```bash
 # Backend (graceful no DB needed for auth)
 cd africajustice-backend && npm run dev
 
-# Frontend  
+# Frontend
 cd africajustice-frontend && npm run dev
 
-# Test login → close → reopen: Works!
+# Test login -> close -> reopen: works
 ```
 
-## Production:
-- Copy .env.example → .env.local (frontend), .env (backend)
+## Production
+- Copy .env.example -> .env.local (frontend), .env (backend)
 - Render/Vercel will use service env vars
 - Auth/login works immediately
-
-**Task complete!** 🚀
-

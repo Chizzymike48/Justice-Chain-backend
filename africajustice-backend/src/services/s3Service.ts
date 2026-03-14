@@ -50,7 +50,6 @@ export class S3Service {
     try {
       const bucket = options.bucket || this.bucket
       const fileExt = path.extname(fileName)
-      const fileNameWithoutExt = path.basename(fileName, fileExt)
       
       // Generate unique key
       const key = `evidence/${Date.now()}-${uuidv4()}${fileExt}`
@@ -115,7 +114,7 @@ export class S3Service {
       }
 
       return new Promise((resolve, reject) => {
-        s3.upload(params, (err: any, data: any) => {
+        s3.upload(params, (err: Error | null, data: S3.ManagedUpload.SendData) => {
           if (err) {
             console.error('[S3] Upload error:', err)
             return reject(new Error('Failed to upload file to S3'))

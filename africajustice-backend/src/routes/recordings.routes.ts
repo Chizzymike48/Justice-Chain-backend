@@ -2,7 +2,6 @@ import { Request, Response, Router } from 'express'
 import { authMiddleware } from '../middleware/auth'
 import type { AuthRequest } from '../types'
 import recordingService from '../services/recordingService'
-import { StreamRecording } from '../models/StreamRecording'
 
 const router = Router()
 
@@ -113,7 +112,7 @@ router.post(
   authMiddleware,
   async (req: AuthRequest, res: Response): Promise<unknown> => {
     try {
-      const { events } = req.body as { events: any[] }
+      const { events } = req.body as { events: unknown[] }
 
       if (!Array.isArray(events)) {
         return res.status(400).json({

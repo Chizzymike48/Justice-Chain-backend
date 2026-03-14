@@ -299,8 +299,8 @@ describe('S3Service', () => {
 
     it('should return false for non-existent files', async () => {
       const fileKey = 'evidence/nonexistent.pdf'
-      const notFoundError = new Error('NotFound')
-      ;(notFoundError as any).code = 'NotFound'
+      const notFoundError = new Error('NotFound') as NodeJS.ErrnoException
+      notFoundError.code = 'NotFound'
 
       mockS3Instance.headObject = jest.fn().mockReturnValue({
         promise: () => Promise.reject(notFoundError),

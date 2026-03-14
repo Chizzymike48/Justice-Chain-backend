@@ -1,5 +1,5 @@
 import { Router } from 'express'
-import { authenticate, authorize } from '../middleware/auth'
+import { authenticate } from '../middleware/auth'
 import { exportLimiter } from '../middleware/rateLimitse'
 import {
   exportReportAsPDF,

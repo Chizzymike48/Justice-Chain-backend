@@ -47,9 +47,10 @@ export const exportLimiter = rateLimit({
   legacyHeaders: false,
   // Use user ID if available, fall back to IP
   keyGenerator: (req: Request) => {
-    return (req as any).user?.id || req.ip || 'anonymous'
+    const userId = (req as { user?: { id?: string } }).user?.id
+    return userId || req.ip || 'anonymous'
   },
-  skip: (req: Request) => {
+  skip: () => {
     // Only apply to admin users and above for export endpoints
     // Non-admin users get lower rate limit
     return false
@@ -68,7 +69,8 @@ export const adminLimiter = rateLimit({
   standardHeaders: true,
   legacyHeaders: false,
   keyGenerator: (req: Request) => {
-    return (req as any).user?.id || req.ip || 'anonymous'
+    const userId = (req as { user?: { id?: string } }).user?.id
+    return userId || req.ip || 'anonymous'
   },
 })
 

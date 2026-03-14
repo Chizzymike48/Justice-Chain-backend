@@ -410,7 +410,7 @@ export const updateUserRoleController = async (req: AuthRequest, res: Response):
     // Emit real-time event
     try {
       const socketEvents = initializeSocketEvents()
-      const changerName = req.user?.id ? (req.user as any).email || 'Admin' : 'Unknown'
+      const changerName = req.user?.id ? req.user.email || 'Admin' : 'Unknown'
       socketEvents.emitUserRoleChanged(id, {
         userId: id,
         oldRole,

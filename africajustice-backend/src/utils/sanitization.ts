@@ -31,7 +31,7 @@ export const escapeHtml = (text: string): string => {
  * @param maxLength - Maximum allowed length (default: 5000)
  * @returns Sanitized input
  */
-export const sanitizeInput = (input: any, maxLength: number = 5000): string => {
+export const sanitizeInput = (input: unknown, maxLength: number = 5000): string => {
   if (!input || typeof input !== 'string') return ''
 
   return escapeHtml(input.trim().substring(0, maxLength))
@@ -43,12 +43,12 @@ export const sanitizeInput = (input: any, maxLength: number = 5000): string => {
  * @param obj - Object to sanitize
  * @returns Sanitized object with escaped strings
  */
-export const sanitizeObject = (obj: Record<string, any>): Record<string, any> => {
-  if (!obj || typeof obj !== 'object') return {}
+export const sanitizeObject = (obj: unknown): Record<string, unknown> => {
+  if (!obj || typeof obj !== 'object' || Array.isArray(obj)) return {}
 
-  const sanitized: Record<string, any> = {}
+  const sanitized: Record<string, unknown> = {}
 
-  Object.entries(obj).forEach(([key, value]) => {
+  Object.entries(obj as Record<string, unknown>).forEach(([key, value]) => {
     // Skip potentially dangerous keys
     if (key.startsWith('$') || key.startsWith('_')) {
       return
@@ -120,7 +120,7 @@ export const sanitizeEmail = (email: string): string => {
  * @param id - ID to validate
  * @returns ID string or empty if invalid
  */
-export const sanitizeObjectId = (id: any): string => {
+export const sanitizeObjectId = (id: unknown): string => {
   if (!id || typeof id !== 'string') return ''
 
   const trimmed = id.trim()

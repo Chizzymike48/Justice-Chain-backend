@@ -1,8 +1,11 @@
-import { Response } from 'express'
+import { Request, Response } from 'express'
 import { Poll } from '../models/Poll'
 import { AuthRequest } from '../middleware/auth'
 
-export const createPollController = async (req: AuthRequest, res: Response) => {
+export const createPollController = async (
+  req: AuthRequest,
+  res: Response
+): Promise<Response> => {
   try {
     const { question, options } = req.body as {
       question?: string
@@ -38,7 +41,7 @@ export const createPollController = async (req: AuthRequest, res: Response) => {
   }
 }
 
-export const getPollsController = async (req: any, res: Response) => {
+export const getPollsController = async (req: Request, res: Response): Promise<Response> => {
   try {
     const queryLimit = req.query.limit as string | undefined
     const querySkip = req.query.skip as string | undefined
@@ -75,7 +78,7 @@ export const getPollsController = async (req: any, res: Response) => {
   }
 }
 
-export const getPollByIdController = async (req: any, res: Response) => {
+export const getPollByIdController = async (req: Request, res: Response): Promise<Response> => {
   try {
     const { id } = req.params
     const poll = await Poll.findById(id)
@@ -100,7 +103,10 @@ export const getPollByIdController = async (req: any, res: Response) => {
   }
 }
 
-export const votePollController = async (req: AuthRequest, res: Response) => {
+export const votePollController = async (
+  req: AuthRequest,
+  res: Response
+): Promise<Response> => {
   try {
     const { id } = req.params
     const { optionIndex } = req.body as { optionIndex?: number }
@@ -143,7 +149,10 @@ export const votePollController = async (req: AuthRequest, res: Response) => {
   }
 }
 
-export const updatePollStatusController = async (req: AuthRequest, res: Response) => {
+export const updatePollStatusController = async (
+  req: AuthRequest,
+  res: Response
+): Promise<Response> => {
   try {
     const { id } = req.params
     const { status } = req.body as { status?: string }

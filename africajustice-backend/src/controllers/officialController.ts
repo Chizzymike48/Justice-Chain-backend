@@ -1,8 +1,11 @@
-import { Response } from 'express'
+import { Request, Response } from 'express'
 import { Official } from '../models/Official'
 import { AuthRequest } from '../middleware/auth'
 
-export const createOfficialController = async (req: AuthRequest, res: Response) => {
+export const createOfficialController = async (
+  req: AuthRequest,
+  res: Response
+): Promise<Response> => {
   try {
     const { name, position, agency, district, trustScore } = req.body as {
       name?: string
@@ -40,7 +43,7 @@ export const createOfficialController = async (req: AuthRequest, res: Response) 
   }
 }
 
-export const getOfficialsController = async (req: any, res: Response) => {
+export const getOfficialsController = async (req: Request, res: Response): Promise<Response> => {
   try {
     const queryLimit = req.query.limit as string | undefined
     const querySkip = req.query.skip as string | undefined
@@ -89,7 +92,7 @@ export const getOfficialsController = async (req: any, res: Response) => {
   }
 }
 
-export const getOfficialByIdController = async (req: any, res: Response) => {
+export const getOfficialByIdController = async (req: Request, res: Response): Promise<Response> => {
   try {
     const { id } = req.params
     const official = await Official.findById(id)
@@ -114,7 +117,10 @@ export const getOfficialByIdController = async (req: any, res: Response) => {
   }
 }
 
-export const updateOfficialTrustScoreController = async (req: AuthRequest, res: Response) => {
+export const updateOfficialTrustScoreController = async (
+  req: AuthRequest,
+  res: Response
+): Promise<Response> => {
   try {
     const { id } = req.params
     const { trustScore } = req.body as { trustScore?: number }

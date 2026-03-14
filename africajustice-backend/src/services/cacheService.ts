@@ -119,7 +119,7 @@ export async function invalidateCache(keyPattern: string): Promise<boolean> {
  */
 export function createListCacheKey(
   modelName: string,
-  filters: Record<string, any>,
+  filters: Record<string, unknown>,
   page: number,
   limit: number
 ): string {

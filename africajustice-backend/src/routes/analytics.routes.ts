@@ -21,7 +21,7 @@ router.post(
   '/stream-events',
   async (req: AuthRequest, res: Response): Promise<unknown> => {
     try {
-      const { events } = req.body as { events: any[] }
+      const { events } = req.body as { events: unknown[] }
 
       if (!Array.isArray(events)) {
         return res.status(400).json({
@@ -31,11 +31,18 @@ router.post(
       }
 
       // Process viewer join/leave/quality change events
-      const processedEvents = events.map((event) => ({
-        ...event,
+      const processedEvents = events.map((event) => {
+        const base =
+          event && typeof event === 'object'
+            ? (event as Record<string, unknown>)
+            : { value: event }
+
+        return {
+          ...base,
         userId: req.user?.id,
         recordedAt: new Date(),
-      }))
+        }
+      })
 
       console.log(`Received ${processedEvents.length} analytics events`)
 
@@ -87,11 +94,12 @@ router.get(
   async (req: Request, res: Response): Promise<unknown> => {
     try {
       const limit = parseInt(req.query.limit as string) || 10
-      const topStreams: any[] = []
+      const topStreams: Array<Record<string, unknown>> = []
+      const limitedStreams = topStreams.slice(0, limit)
 
       return res.json({
         success: true,
-        data: topStreams,
+        data: limitedStreams,
       })
     } catch (error) {
       return res.status(500).json({

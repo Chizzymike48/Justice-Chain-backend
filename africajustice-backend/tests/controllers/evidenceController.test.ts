@@ -100,8 +100,6 @@ describe('Evidence Controller - Upload & Integration Tests', () => {
 
     it('should validate file size before upload', async () => {
       req.file.size = 600 * 1024 * 1024 // 600MB - exceeds limit
-      const maxSize = 500 * 1024 * 1024
-
       await evidenceController.uploadEvidenceController(
         req as Request,
         res as Response
@@ -180,7 +178,7 @@ describe('Evidence Controller - Upload & Integration Tests', () => {
           mimetype: 'application/pdf',
           size: 2048,
         },
-      ] as any
+      ] as Express.Multer.File[]
 
       ;(virusScan as jest.Mock).mockResolvedValue({ clean: true })
       ;(mockS3Service.uploadFile as jest.Mock).mockResolvedValue({
@@ -220,7 +218,7 @@ describe('Evidence Controller - Upload & Integration Tests', () => {
           mimetype: 'application/pdf',
           size: 1024,
         },
-      ] as any
+      ] as Express.Multer.File[]
 
       ;(virusScan as jest.Mock)
         .mockResolvedValueOnce({ clean: true })

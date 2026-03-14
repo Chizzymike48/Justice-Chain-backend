@@ -119,8 +119,8 @@ export function parsePaginationParams(
  * @param filters - Object with filter criteria
  * @returns MongoDB query object
  */
-export function buildFilterQuery(filters: Record<string, any>): Record<string, any> {
-  const query: Record<string, any> = {}
+export function buildFilterQuery(filters: Record<string, unknown>): Record<string, unknown> {
+  const query: Record<string, unknown> = {}
 
   Object.entries(filters).forEach(([key, value]) => {
     if (value === undefined || value === null || value === '') {
@@ -129,14 +129,13 @@ export function buildFilterQuery(filters: Record<string, any>): Record<string, a
 
     // Handle date range queries
     if (key === 'startDate' || key === 'endDate') {
-      if (!query.createdAt) {
-        query.createdAt = {}
-      }
+      const dateQuery = (query.createdAt as Record<string, unknown>) || {}
       if (key === 'startDate') {
-        query.createdAt.$gte = new Date(value)
+        dateQuery.$gte = new Date(String(value))
       } else {
-        query.createdAt.$lte = new Date(value)
+        dateQuery.$lte = new Date(String(value))
       }
+      query.createdAt = dateQuery
     } else if (key === 'status' || key === 'category') {
       // Exact match for status/category
       query[key] = value

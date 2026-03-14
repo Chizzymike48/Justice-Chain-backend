@@ -39,8 +39,23 @@ const KEYWORDS = {
   goodbye: ['bye', 'goodbye', 'see you', 'later', 'farewell', 'quit', 'exit'],
 };
 
+interface ConversationStats {
+  totalMessages: number
+  botMessages: number
+  userMessages: number
+  averageRating: string
+  ratedCount: number
+}
+
 export class ChatService {
-  async saveMessage(userId: string, sender: 'user' | 'bot', message: string, messageType: 'text' | 'voice' | 'audio-response' = 'text', voiceUrl?: string, audioResponseUrl?: string) {
+  async saveMessage(
+    userId: string,
+    sender: 'user' | 'bot',
+    message: string,
+    messageType: 'text' | 'voice' | 'audio-response' = 'text',
+    voiceUrl?: string,
+    audioResponseUrl?: string
+  ): Promise<unknown> {
     try {
       const chatMessage = new ChatMessage({
         userId,
@@ -64,11 +79,11 @@ export class ChatService {
         voiceUrl,
         audioResponseUrl,
         createdAt: new Date(),
-      } as any;
+      };
     }
   }
 
-  async getConversationHistory(userId: string, limit: number = 50) {
+  async getConversationHistory(userId: string, limit: number = 50): Promise<unknown[]> {
     try {
       const messages = await ChatMessage.find({ userId })
         .sort({ createdAt: -1 })
@@ -82,7 +97,7 @@ export class ChatService {
     }
   }
 
-  async getCaseRelatedMessages(caseId: string) {
+  async getCaseRelatedMessages(caseId: string): Promise<unknown[]> {
     try {
       const messages = await ChatMessage.find({ caseId })
         .sort({ createdAt: -1 })
@@ -95,7 +110,7 @@ export class ChatService {
     }
   }
 
-  async rateChatResponse(messageId: string, rating: number) {
+  async rateChatResponse(messageId: string, rating: number): Promise<unknown> {
     try {
       const message = await ChatMessage.findByIdAndUpdate(
         messageId,
@@ -106,7 +121,7 @@ export class ChatService {
     } catch (error) {
       console.warn('Warning: Failed to rate message in database:', (error as Error).message);
       // Return a mock response if MongoDB is unavailable
-      return { _id: messageId, rating } as any;
+      return { _id: messageId, rating };
     }
   }
 
@@ -188,7 +203,7 @@ export class ChatService {
       "I'm here to help! You can ask me about reporting corruption, uploading evidence, tracking cases, or anything else about Justice Chain. How can I assist you?";
   }
 
-  async searchChatHistory(userId: string, query: string) {
+  async searchChatHistory(userId: string, query: string): Promise<unknown[]> {
     try {
       const messages = await ChatMessage.find({
         userId,
@@ -202,7 +217,7 @@ export class ChatService {
     }
   }
 
-  async deleteOldMessages(userId: string, daysOld: number = 30) {
+  async deleteOldMessages(userId: string, daysOld: number = 30): Promise<{ deletedCount: number }> {
     try {
       const cutoffDate = new Date();
       cutoffDate.setDate(cutoffDate.getDate() - daysOld);
@@ -212,15 +227,15 @@ export class ChatService {
         createdAt: { $lt: cutoffDate },
       });
 
-      return result;
+      return { deletedCount: result.deletedCount ?? 0 };
     } catch (error) {
       console.warn('Warning: Failed to delete old messages from database:', (error as Error).message);
       // Return a success response even if MongoDB is unavailable
-      return { deletedCount: 0 } as any;
+      return { deletedCount: 0 };
     }
   }
 
-  async getConversationStats(userId: string) {
+  async getConversationStats(userId: string): Promise<ConversationStats> {
     try {
       const totalMessages = await ChatMessage.countDocuments({ userId });
       const botMessages = await ChatMessage.countDocuments({ userId, sender: 'bot' });

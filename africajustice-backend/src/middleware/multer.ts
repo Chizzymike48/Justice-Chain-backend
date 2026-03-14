@@ -30,7 +30,7 @@ const fileFilter = (
   _req: Request,
   file: Express.Multer.File,
   cb: (error: Error | null, acceptFile?: boolean) => void
-) => {
+): void => {
   // Check MIME type
   if (!ALLOWED_MIME_TYPES.includes(file.mimetype)) {
     return cb(new Error(`Invalid file type: ${file.mimetype}. Allowed types: ${ALLOWED_MIME_TYPES.join(', ')}`))
@@ -57,21 +57,22 @@ export const validateUploadedFile = (
   next: NextFunction
 ): void => {
   if (!req.file) {
-    return res.status(400).json({
+    res.status(400).json({
       success: false,
       message: 'No file uploaded',
-    }) as any
+    })
+    return
   }
 
   if (req.file.size > FILE_SIZE_LIMIT) {
-    return res.status(413).json({
+    res.status(413).json({
       success: false,
       message: `File too large. Maximum size: ${FILE_SIZE_LIMIT / (1024 * 1024)}MB`,
-    }) as any
+    })
+    return
   }
 
   next()
 }
 
 export default upload
-

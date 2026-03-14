@@ -139,7 +139,7 @@ const sampleVerifications = [
   },
 ]
 
-async function seedDatabase() {
+async function seedDatabase(): Promise<void> {
   try {
     console.log('🌱 Starting database seeding...')
 

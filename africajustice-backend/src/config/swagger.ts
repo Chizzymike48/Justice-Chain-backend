@@ -95,7 +95,7 @@ const options = {
   ],
 }
 
-let specs: any
+let specs: ReturnType<typeof swaggerJsdoc>
 
 try {
   specs = swaggerJsdoc(options)
@@ -108,7 +108,7 @@ export const setupSwagger = (app: Express): void => {
   try {
     app.use(
       '/api/v1/api-docs',
-      swaggerUi.serve as any,
+      swaggerUi.serve,
       swaggerUi.setup(specs, {
         swaggerOptions: {
           persistAuthorization: true,
@@ -117,14 +117,14 @@ export const setupSwagger = (app: Express): void => {
           operationsSorter: 'alpha',
         },
         customCss: '.swagger-ui { --spacing-unit: 20px; }',
-      }) as any
+      })
     )
 
     // Also mount at root for easier access
     app.use(
       '/api-docs',
-      swaggerUi.serve as any,
-      swaggerUi.setup(specs) as any
+      swaggerUi.serve,
+      swaggerUi.setup(specs)
     )
 
     console.log('📚 Swagger documentation available at /api-docs and /api/v1/api-docs')

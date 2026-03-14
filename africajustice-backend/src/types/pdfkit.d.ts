@@ -59,7 +59,7 @@ declare module 'pdfkit' {
     stroke(): this;
     rect(x: number, y: number, width: number, height: number): this;
     fill(): this;
-    image(src: string | Buffer | Readable, x?: number, y?: number, options?: any): this;
+    image(src: string | Buffer | Readable, x?: number, y?: number, options?: unknown): this;
     addPage(options?: PDFDocumentOptions): this;
     end(): this;
     switchToPage(index: number): this;
@@ -69,7 +69,7 @@ declare module 'pdfkit' {
     x: number;
 
     // For HTTP responses
-    pipe(destination: any, options?: any): any;
+    pipe(destination: unknown, options?: unknown): unknown;
   }
 }
 

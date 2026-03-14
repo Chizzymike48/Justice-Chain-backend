@@ -153,5 +153,5 @@ export class UploadEvents {
   }
 }
 
-export const initializeUploadEvents = (io: IOServer) => new UploadEvents(io)
+export const initializeUploadEvents = (io: IOServer): UploadEvents => new UploadEvents(io)
 export default UploadEvents

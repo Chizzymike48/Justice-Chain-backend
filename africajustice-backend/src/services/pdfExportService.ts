@@ -2,6 +2,20 @@ import PDFDocument from 'pdfkit'
 import type { Readable } from 'stream'
 import type { IReport, IEvidence, IVerification } from '../models'
 
+type ReportExtras = {
+  type?: string
+  location?: string
+}
+
+type EvidenceExtras = {
+  type?: string
+  description?: string
+}
+
+type VerificationExtras = {
+  notes?: string
+}
+
 interface ExportOptions {
   title?: string
   includeLogo?: boolean
@@ -27,7 +41,7 @@ export async function generateReportPDF(
     try {
       const {
         title = 'JusticeChain Report',
-        includeLogo = true,
+        includeLogo: _includeLogo = true,
         includeMetadata = true,
         pageSize = 'A4',
         orientation = 'portrait',
@@ -35,6 +49,7 @@ export async function generateReportPDF(
 
       const doc = new PDFDocument({
         size: pageSize,
+        layout: orientation,
         margin: 50,
         bufferPages: true,
       })
@@ -55,13 +70,14 @@ export async function generateReportPDF(
 
       doc.text(`ID: ${data.report._id}`)
       doc.text(`Title: ${data.report.title || 'N/A'}`)
-      doc.text(`Type: ${(data.report as any).type || 'N/A'}`)
+      const reportData = data.report as IReport & ReportExtras
+      doc.text(`Type: ${reportData.type || 'N/A'}`)
       doc.text(`Status: ${data.report.status || 'N/A'}`)
       doc.text(`Date Filed: ${data.report.createdAt ? new Date(data.report.createdAt).toLocaleDateString() : 'N/A'}`)
       doc.text(`Description: ${data.report.description || 'N/A'}`)
 
-      if ((data.report as any).location) {
-        doc.text(`Location: ${(data.report as any).location}`)
+      if (reportData.location) {
+        doc.text(`Location: ${reportData.location}`)
       }
 
       doc.moveDown(2)
@@ -72,13 +88,14 @@ export async function generateReportPDF(
         doc.fontSize(10).font('Helvetica')
 
         data.evidence.forEach((evidence, index) => {
+          const evidenceData = evidence as IEvidence & EvidenceExtras
           doc.text(`\n[Evidence ${index + 1}]`)
-          doc.text(`Type: ${(evidence as any).type || 'N/A'}`)
+          doc.text(`Type: ${evidenceData.type || 'N/A'}`)
           doc.text(`Uploaded: ${evidence.createdAt ? new Date(evidence.createdAt).toLocaleDateString() : 'N/A'}`)
           doc.text(`Status: ${evidence.status || 'Pending Review'}`)
 
-          if ((evidence as any).description) {
-            doc.text(`Description: ${(evidence as any).description}`)
+          if (evidenceData.description) {
+            doc.text(`Description: ${evidenceData.description}`)
           }
         })
 
@@ -91,12 +108,13 @@ export async function generateReportPDF(
         doc.fontSize(10).font('Helvetica')
 
         data.verifications.forEach((verification, index) => {
+          const verificationData = verification as IVerification & VerificationExtras
           doc.text(`\n[Verification ${index + 1}]`)
           doc.text(`Status: ${verification.status || 'N/A'}`)
           doc.text(`Verified Date: ${verification.createdAt ? new Date(verification.createdAt).toLocaleDateString() : 'N/A'}`)
 
-          if ((verification as any).notes) {
-            doc.text(`Notes: ${(verification as any).notes}`)
+          if (verificationData.notes) {
+            doc.text(`Notes: ${verificationData.notes}`)
           }
         })
 
@@ -113,7 +131,7 @@ export async function generateReportPDF(
       }
 
       doc.end()
-      resolve(doc as any)
+      resolve(doc as unknown as Readable)
     } catch (error) {
       reject(error)
     }
@@ -160,13 +178,14 @@ export async function generateBulkReportsPDF(
       reports.forEach((data) => {
         doc.text(String(data.report._id).substring(0, 15), 50, doc.y, { width: 100 })
         doc.text(data.report.title || 'N/A', 150, doc.y - 12, { width: 150 })
-        doc.text((data.report as any).type || 'N/A', 300, doc.y, { width: 80 })
+        const reportData = data.report as IReport & ReportExtras
+        doc.text(reportData.type || 'N/A', 300, doc.y, { width: 80 })
         doc.text(data.report.status || 'N/A', 380, doc.y, { width: 80 })
         doc.moveDown(1.2)
       })
 
       doc.end()
-      resolve(doc as any)
+      resolve(doc as unknown as Readable)
     } catch (error) {
       reject(error)
     }
@@ -252,7 +271,7 @@ export async function generateAnalyticsPDF(
       }
 
       doc.end()
-      resolve(doc as any)
+      resolve(doc as unknown as Readable)
     } catch (error) {
       reject(error)
     }

@@ -12,7 +12,7 @@ describe('Socket.io Real-Time Features - Integration Tests', () => {
   let io: jest.Mocked<SocketServer>
   let mockSocket: jest.Mocked<Socket>
   let socketEvents: SocketEvents
-  let mockUser: any
+  let mockUser: { _id: string; email: string; role: string; name: string }
 
   beforeEach(() => {
     jest.clearAllMocks()
@@ -26,7 +26,7 @@ describe('Socket.io Real-Time Features - Integration Tests', () => {
       leave: jest.fn(),
       to: jest.fn(),
       data: { user: null },
-    } as any
+    } as unknown as jest.Mocked<Socket>
 
     // Mock IO server
     io = {
@@ -37,7 +37,7 @@ describe('Socket.io Real-Time Features - Integration Tests', () => {
       engine: {
         clientsCount: 1,
       },
-    } as any
+    } as unknown as jest.Mocked<SocketServer>
 
     // Mock user
     mockUser = {
@@ -61,7 +61,7 @@ describe('Socket.io Real-Time Features - Integration Tests', () => {
       const token = 'valid.jwt.token'
       mockSocket.handshake = {
         auth: { token },
-      } as any
+      } as unknown as Socket['handshake']
 
       initSocketHandlers(io, mockSocket)
 
@@ -73,7 +73,7 @@ describe('Socket.io Real-Time Features - Integration Tests', () => {
       const token = 'valid.jwt.token'
       mockSocket.handshake = {
         auth: { token },
-      } as any
+      } as unknown as Socket['handshake']
 
       mockUser.role = 'admin'
       ;(User.findById as jest.Mock).mockResolvedValue(mockUser)
@@ -91,7 +91,7 @@ describe('Socket.io Real-Time Features - Integration Tests', () => {
       const token = 'valid.jwt.token'
       mockSocket.handshake = {
         auth: { token },
-      } as any
+      } as unknown as Socket['handshake']
 
       mockUser.role = 'reporter'
       ;(User.findById as jest.Mock).mockResolvedValue(mockUser)
@@ -107,13 +107,13 @@ describe('Socket.io Real-Time Features - Integration Tests', () => {
     it('should handle authentication errors gracefully', async () => {
       mockSocket.handshake = {
         auth: { token: 'invalid.token' },
-      } as any
+      } as unknown as Socket['handshake']
 
       ;(jwt.verify as jest.Mock).mockImplementation(() => {
         throw new Error('Invalid token')
       })
 
-      const initHandler = () => registerSocketHandlers(io, mockSocket)
+      const initHandler = (): void => registerSocketHandlers(io, mockSocket)
 
       // Should not throw, but handle error
       expect(() => initHandler()).not.toThrow()
@@ -123,7 +123,7 @@ describe('Socket.io Real-Time Features - Integration Tests', () => {
       const token = 'valid.jwt.token'
       mockSocket.handshake = {
         auth: { token },
-      } as any
+      } as unknown as Socket['handshake']
 
       initSocketHandlers(io, mockSocket)
 
@@ -349,7 +349,7 @@ describe('Socket.io Real-Time Features - Integration Tests', () => {
 
   describe('Event Data Validation', () => {
     it('should validate event structure for report moderated', () => {
-      const invalidEvent: any = {
+      const invalidEvent: Record<string, unknown> = {
         // Missing required fields
         title: 'Test',
       }

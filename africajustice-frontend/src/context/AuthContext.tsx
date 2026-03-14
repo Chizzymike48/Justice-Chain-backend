@@ -1,5 +1,4 @@
-import { createContext, useState, useContext, useEffect, ReactNode, FC } from 'react'
-import authService from '../services/authService'
+import { createContext, useState, useContext, useEffect, useCallback, ReactNode, FC } from 'react'
 
 interface User {
   id?: string
@@ -63,13 +62,13 @@ export const AuthProvider: FC<AuthProviderProps> = ({ children }) => {
     }
   }
 
-  const logout = () => {
+  const logout = useCallback(() => {
     setIsLoggedIn(false)
     setUser(null)
     localStorage.removeItem('isLoggedIn')
     localStorage.removeItem('user')
     localStorage.removeItem(AUTH_TOKEN_KEY)
-  }
+  }, [AUTH_TOKEN_KEY])
 
   // Validate stored token on mount
   useEffect(() => {
@@ -105,7 +104,7 @@ export const AuthProvider: FC<AuthProviderProps> = ({ children }) => {
     }
 
     validateToken()
-  }, [])
+  }, [isLoggedIn, user?.token, logout])
 
   const value: AuthContextType = {
     isLoggedIn,

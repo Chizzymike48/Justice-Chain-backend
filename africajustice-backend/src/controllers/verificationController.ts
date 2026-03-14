@@ -1,8 +1,11 @@
-import { Response } from 'express'
+import { Request, Response } from 'express'
 import { Verification } from '../models/Verification'
 import { AuthRequest } from '../middleware/auth'
 
-export const submitVerificationController = async (req: AuthRequest, res: Response) => {
+export const submitVerificationController = async (
+  req: AuthRequest,
+  res: Response
+): Promise<Response> => {
   try {
     const { claim, source, confidence } = req.body as {
       claim?: string
@@ -43,7 +46,7 @@ export const submitVerificationController = async (req: AuthRequest, res: Respon
   }
 }
 
-export const getVerificationsController = async (req: any, res: Response) => {
+export const getVerificationsController = async (req: Request, res: Response): Promise<Response> => {
   try {
     const queryLimit = req.query.limit as string | undefined
     const querySkip = req.query.skip as string | undefined
@@ -80,7 +83,7 @@ export const getVerificationsController = async (req: any, res: Response) => {
   }
 }
 
-export const getVerificationByIdController = async (req: any, res: Response) => {
+export const getVerificationByIdController = async (req: Request, res: Response): Promise<Response> => {
   try {
     const { id } = req.params
     const verification = await Verification.findById(id)
@@ -105,7 +108,10 @@ export const getVerificationByIdController = async (req: any, res: Response) => 
   }
 }
 
-export const reviewVerificationController = async (req: AuthRequest, res: Response) => {
+export const reviewVerificationController = async (
+  req: AuthRequest,
+  res: Response
+): Promise<Response> => {
   try {
     const { id } = req.params
     const { status, confidence } = req.body as {

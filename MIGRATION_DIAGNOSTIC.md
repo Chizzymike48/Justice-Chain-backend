@@ -1,48 +1,44 @@
-## 🔍 DETAILED MONGODB MIGRATION DIAGNOSTIC
+# MongoDB Migration Diagnostic
 
-### Current Status:
-- ✅ Cluster Location: AWS eu-west-1 (Ireland) - MIGRATED
-- ✅ System Status: All Good (from MongoDB Atlas dashboard)
-- ❌ Connection From Render: 503 Service Unavailable
-- ❌ Local Connection: querySrv ECONNREFUSED
+Last updated: 2026-03-14
 
-### Connection String:
+Purpose: Checklist for troubleshooting connectivity after an Atlas region migration.
+
+## Example symptoms (replace with your current observations)
+- Cluster moved regions
+- Backend returns 5xx for database-backed requests
+- Local connection fails with a `querySrv ECONNREFUSED` error
+
+## Example connection string (redacted)
 ```
-mongodb+srv://michaelchizoba5_db_user:PASSWORD@cluster0.wwppqlm.mongodb.net/Justicechain?ssl=true&authSource=admin&retryWrites=true&w=majority
+mongodb+srv://<db_user>:<db_password>@<cluster-host>/<db_name>?ssl=true&authSource=admin&retryWrites=true&w=majority
 ```
 
-### Possible Issues After Migration:
+## Possible issues after migration
+1. DNS propagation delay
+   - Old region DNS may be cached
+   - New region DNS not fully propagated
+   - Action: wait 15-30 minutes or clear DNS cache
 
-1. **DNS Propagation Delay**
-   - Old region (UAE) DNS might still be cached
-   - New region (Ireland) DNS hasn't fully propagated
-   - Solution: Wait 15-30 minutes more OR force DNS clear
+2. Cluster nodes not fully ready
+   - Migration may still be initializing nodes
+   - Replica set not fully synced
+   - Action: check MongoDB Atlas activity logs
 
-2. **Cluster Nodes Not Fully Ready**
-   - Migration might still be initializing nodes
-   - Replica set might not be fully synced
-   - Solution: Check MongoDB Atlas activity logs
+3. SSL/certificate mismatch
+   - New cluster may have new certificates
+   - Connection string may need regeneration
+   - Action: generate a fresh connection string from Atlas
 
-3. ** SSL/Certificate Mismatch**
-   - New cluster might have new certificates
-   - Connection string might need to be regenerated
-   - Solution: Get NEW connection string from CONNECT button
-
-4. **Replica Set Configuration**
+4. Replica set configuration
    - Old replica set info cached in DNS
-   - New replica set not registered
-   - Solution: MongoDB should auto-handle this
+   - New replica set not registered yet
+   - Action: Atlas usually handles this automatically; re-check after DNS clears
 
-### What Changed During Migration:
-- ✅ Cluster moved to different AWS region
-- ❓ Connection string hostname - SHOULD stay same but point to new region via DNS
-- ❓ Internal node addresses - Changed to new region
-- ❓ Certificates/SSL - Might be regenerated
-
-### Next Steps:
-1. Check if MongoDB Atlas shows "Healthy" status
-2. Get FRESH connection string from CONNECT button
-3. Compare with current .env MONGODB_URI
-4. If different, update and redeploy backend to Render
-5. Check Render build/deployment logs
-6. Test connection again
+## Next steps
+1. Confirm MongoDB Atlas status is "Healthy"
+2. Get a fresh connection string from the Connect button
+3. Compare with current `.env` `MONGODB_URI`
+4. Update and redeploy the backend if different
+5. Check hosting provider build/deployment logs
+6. Re-test the connection

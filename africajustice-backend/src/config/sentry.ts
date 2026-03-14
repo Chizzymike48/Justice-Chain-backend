@@ -110,7 +110,7 @@ export function setupSentryErrorHandler(app: Express): void {
  */
 export function captureError(
   error: Error,
-  context: Record<string, any> = {}
+  context: Record<string, unknown> = {}
 ): void {
   if (!sentryDsn) {
     console.error('Error:', error, context);
@@ -130,7 +130,7 @@ export function captureError(
 export function captureMessage(
   message: string,
   level: Sentry.SeverityLevel = 'info',
-  context: Record<string, any> = {}
+  context: Record<string, unknown> = {}
 ): void {
   if (!sentryDsn) {
     console.log(`[${level.toUpperCase()}] ${message}`, context);
@@ -152,7 +152,7 @@ export function addBreadcrumb(
   message: string,
   category: string = 'custom',
   level: Sentry.SeverityLevel = 'info',
-  data: Record<string, any> = {}
+  data: Record<string, unknown> = {}
 ): void {
   if (!sentryDsn) return;
 

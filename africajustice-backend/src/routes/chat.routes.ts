@@ -62,14 +62,15 @@ router.get('/history', authenticateToken, async (req: AuthRequest, res: Response
 });
 
 // GET: Search chat history
-router.get('/search', authenticateToken, async (req: AuthRequest, res: Response): Promise<any> => {
+router.get('/search', authenticateToken, async (req: AuthRequest, res: Response): Promise<void> => {
   try {
     const userId = requireUserId(req, res);
     if (!userId) return;
     const query = req.query.q as string;
 
     if (!query) {
-      return res.status(400).json({ error: 'Search query required' });
+      res.status(400).json({ error: 'Search query required' });
+      return;
     }
 
     const results = await chatService.searchChatHistory(userId, query);
@@ -86,7 +87,7 @@ router.get('/search', authenticateToken, async (req: AuthRequest, res: Response)
 });
 
 // POST: Rate a message
-router.post('/:messageId/rate', authenticateToken, async (req: AuthRequest, res: Response): Promise<any> => {
+router.post('/:messageId/rate', authenticateToken, async (req: AuthRequest, res: Response): Promise<void> => {
   try {
     const { rating } = req.body;
     const { messageId } = req.params;
@@ -94,7 +95,8 @@ router.post('/:messageId/rate', authenticateToken, async (req: AuthRequest, res:
     if (!userId) return;
 
     if (!rating || rating < 1 || rating > 5) {
-      return res.status(400).json({ error: 'Rating must be between 1 and 5' });
+      res.status(400).json({ error: 'Rating must be between 1 and 5' });
+      return;
     }
 
     const rated = await chatService.rateChatResponse(messageId, rating);
@@ -167,13 +169,14 @@ router.get('/case/:caseId', authenticateToken, async (req: AuthRequest, res: Res
 });
 
 // TEST ENDPOINT: Send a chat message without authentication (for development/testing only)
-router.post('/test/send', async (req: Request, res: Response): Promise<any> => {
+router.post('/test/send', async (req: Request, res: Response): Promise<void> => {
   try {
     const { message, language = 'en' } = req.body;
     const testUserId = 'test-user-' + Date.now();
 
     if (!message) {
-      return res.status(400).json({ error: 'Message is required' });
+      res.status(400).json({ error: 'Message is required' });
+      return;
     }
 
     // Generate bot response with timeout protection

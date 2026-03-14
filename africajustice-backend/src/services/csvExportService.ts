@@ -1,6 +1,33 @@
 import { Parser } from 'json2csv'
 import type { IReport, IEvidence, IVerification } from '../models'
 
+type ReportExtras = {
+  type?: string
+  location?: string
+  reporterEmail?: string
+  evidenceCount?: number
+  verificationStatus?: string
+}
+
+type EvidenceExtras = {
+  reportId?: string
+  type?: string
+  description?: string
+  fileName?: string
+  fileSize?: number
+  uploadedBy?: string
+  virusStatus?: string
+}
+
+type VerificationExtras = {
+  reportId?: string
+  verifiedBy?: string
+  verifierRole?: string
+  notes?: string
+  evidence?: string
+  riskLevel?: string
+}
+
 interface CSVExportOptions {
   delimiter?: ','  | ';' | '\t'
   includeHeaders?: boolean
@@ -30,22 +57,25 @@ export function generateReportsCSV(
     'verificationStatus',
   ]
 
-  const data = reports.map((report) => ({
-    id: String(report._id),
-    title: report.title || '',
-    type: (report as any).type || '',
-    status: report.status || '',
-    description: report.description || '',
-    location: (report as any).location || '',
-    reporterEmail: (report as any).reporterEmail || '',
-    createdAt: report.createdAt ? new Date(report.createdAt).toISOString() : '',
-    updatedAt: report.updatedAt ? new Date(report.updatedAt).toISOString() : '',
-    evidenceCount: (report as any).evidenceCount || 0,
-    verificationStatus: (report as any).verificationStatus || 'Pending',
-  }))
+  const data = reports.map((report) => {
+    const reportData = report as IReport & ReportExtras
+    return {
+      id: String(report._id),
+      title: report.title || '',
+      type: reportData.type || '',
+      status: report.status || '',
+      description: report.description || '',
+      location: reportData.location || '',
+      reporterEmail: reportData.reporterEmail || '',
+      createdAt: report.createdAt ? new Date(report.createdAt).toISOString() : '',
+      updatedAt: report.updatedAt ? new Date(report.updatedAt).toISOString() : '',
+      evidenceCount: reportData.evidenceCount || 0,
+      verificationStatus: reportData.verificationStatus || 'Pending',
+    }
+  })
 
   try {
-    const parser = new Parser({ fields, delimiter })
+    const parser = new Parser({ fields, delimiter, header: includeHeaders })
     return parser.parse(data)
   } catch (error) {
     console.error('Error generating CSV:', error)
@@ -76,19 +106,22 @@ export function generateEvidenceCSV(
     'updatedAt',
   ]
 
-  const data = evidence.map((ev) => ({
-    id: String(ev._id),
-    reportId: String((ev as any).reportId || ''),
-    type: (ev as any).type || '',
-    status: ev.status || '',
-    description: (ev as any).description || '',
-    fileName: (ev as any).fileName || '',
-    fileSize: (ev as any).fileSize || 0,
-    uploadedBy: String((ev as any).uploadedBy || ''),
-    virusStatus: (ev as any).virusStatus || 'Not Scanned',
-    createdAt: ev.createdAt ? new Date(ev.createdAt).toISOString() : '',
-    updatedAt: ev.updatedAt ? new Date(ev.updatedAt).toISOString() : '',
-  }))
+  const data = evidence.map((ev) => {
+    const evidenceData = ev as IEvidence & EvidenceExtras
+    return {
+      id: String(ev._id),
+      reportId: String(evidenceData.reportId || ''),
+      type: evidenceData.type || '',
+      status: ev.status || '',
+      description: evidenceData.description || '',
+      fileName: evidenceData.fileName || '',
+      fileSize: evidenceData.fileSize || 0,
+      uploadedBy: String(evidenceData.uploadedBy || ''),
+      virusStatus: evidenceData.virusStatus || 'Not Scanned',
+      createdAt: ev.createdAt ? new Date(ev.createdAt).toISOString() : '',
+      updatedAt: ev.updatedAt ? new Date(ev.updatedAt).toISOString() : '',
+    }
+  })
 
   try {
     const parser = new Parser({ fields, delimiter })
@@ -121,18 +154,21 @@ export function generateVerificationsCSV(
     'updatedAt',
   ]
 
-  const data = verifications.map((verification) => ({
-    id: String(verification._id),
-    reportId: String((verification as any).reportId || ''),
-    status: verification.status || '',
-    verifiedBy: String((verification as any).verifiedBy || ''),
-    verifierRole: (verification as any).verifierRole || '',
-    notes: (verification as any).notes || '',
-    evidence: (verification as any).evidence || '',
-    riskLevel: (verification as any).riskLevel || 'Unknown',
-    createdAt: verification.createdAt ? new Date(verification.createdAt).toISOString() : '',
-    updatedAt: verification.updatedAt ? new Date(verification.updatedAt).toISOString() : '',
-  }))
+  const data = verifications.map((verification) => {
+    const verificationData = verification as IVerification & VerificationExtras
+    return {
+      id: String(verification._id),
+      reportId: String(verificationData.reportId || ''),
+      status: verification.status || '',
+      verifiedBy: String(verificationData.verifiedBy || ''),
+      verifierRole: verificationData.verifierRole || '',
+      notes: verificationData.notes || '',
+      evidence: verificationData.evidence || '',
+      riskLevel: verificationData.riskLevel || 'Unknown',
+      createdAt: verification.createdAt ? new Date(verification.createdAt).toISOString() : '',
+      updatedAt: verification.updatedAt ? new Date(verification.updatedAt).toISOString() : '',
+    }
+  })
 
   try {
     const parser = new Parser({ fields, delimiter })
@@ -165,10 +201,8 @@ export function generateAnalyticsCSV(
       verificationsDone: number
     }>
   },
-  options: CSVExportOptions = {}
+  _options: CSVExportOptions = {}
 ): string {
-  const { delimiter = ',' } = options
-
   try {
     // Summary section
     let csv = 'SUMMARY\n'
@@ -221,8 +255,6 @@ export function generateComprehensiveCSV(
   },
   options: CSVExportOptions = {}
 ): string {
-  const { delimiter = ',' } = options
-
   try {
     let csv = ''
 

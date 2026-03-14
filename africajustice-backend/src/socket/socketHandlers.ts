@@ -1,5 +1,5 @@
 import { Server, Socket } from 'socket.io'
-import jwt from 'jsonwebtoken'
+import jwt, { JwtPayload } from 'jsonwebtoken'
 import { setupLiveStreamHandlers } from './liveStream'
 import { setupLiveStreamHandler } from './livestreamHandler'
 import { getSocketServer } from './socketRegistry'
@@ -38,8 +38,15 @@ const attachUser = async (socket: CustomSocket): Promise<void> => {
   }
 
   try {
-    const decoded = jwt.verify(token, process.env.JWT_SECRET || '') as any
-    const user = await User.findById(decoded.id)
+    const decoded = jwt.verify(token, process.env.JWT_SECRET || '')
+    if (typeof decoded === 'string') {
+      return
+    }
+    const payload = decoded as JwtPayload & { id?: string }
+    if (!payload.id) {
+      return
+    }
+    const user = await User.findById(payload.id)
     if (!user) {
       return
     }

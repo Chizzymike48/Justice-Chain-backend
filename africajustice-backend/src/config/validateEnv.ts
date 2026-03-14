@@ -28,7 +28,7 @@ const validateEnv = (): void => {
   }
 
   if (missingOptional.length > 0) {
-    console.warn(`⚠️ Missing optional vars (graceful fallback): ${missingOptional.join(', ')}`)
+    console.warn(`Missing optional vars (graceful fallback): ${missingOptional.join(', ')}`)
     console.warn('Set ENABLE_MONGO=false to explicitly disable DB features.')
   }
 }
