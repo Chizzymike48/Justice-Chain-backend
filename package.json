@@ -1,7 +1,7 @@
 {
   "name": "justicechain",
   "version": "1.1.0",
-  "description\": "JusticeChain v1.1.0 - DEPLOYED WITH ALL 9 LANGUAGES - Updated 03/15/2026 00:17:41",
+  "description": "JusticeChain v1.1.0 - DEPLOYED WITH ALL 9 LANGUAGES (EN, FR, ES, SW, PT, AM, HA, YO, IG)",
   "private": true,
   "scripts": {
     "install:all": "npm install && npm --prefix africajustice-backend install && npm --prefix africajustice-frontend install",
