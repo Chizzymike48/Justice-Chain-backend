@@ -1,0 +1,359 @@
+/* Help Components Styles */
+
+/* Tooltip */
+.tooltip-wrapper {
+  position: relative;
+  display: inline-block;
+  cursor: help;
+}
+
+.tooltip-content {
+  position: absolute;
+  background: #1a1a1a;
+  color: white;
+  padding: 0.8rem 1rem;
+  border-radius: 6px;
+  font-size: 0.85rem;
+  white-space: nowrap;
+  z-index: 1000;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  pointer-events: none;
+  animation: fadeIn 0.2s ease;
+}
+
+.tooltip-top .tooltip-content {
+  bottom: 130%;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.tooltip-top .tooltip-content::after {
+  content: '';
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  border: 6px solid transparent;
+  border-top-color: #1a1a1a;
+}
+
+.tooltip-bottom .tooltip-content {
+  top: 130%;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.tooltip-bottom .tooltip-content::after {
+  content: '';
+  position: absolute;
+  bottom: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  border: 6px solid transparent;
+  border-bottom-color: #1a1a1a;
+}
+
+.tooltip-left .tooltip-content {
+  right: 130%;
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+.tooltip-right .tooltip-content {
+  left: 130%;
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateX(-50%) translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+}
+
+/* Help Icon */
+.help-icon-container {
+  position: relative;
+  display: inline-block;
+}
+
+.help-icon-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: none;
+  border: none;
+  padding: 0.4rem;
+  cursor: help;
+  color: #667eea;
+  transition: all 0.2s ease;
+  border-radius: 50%;
+}
+
+.help-icon-btn:hover {
+  background: #f0f0f0;
+  transform: scale(1.1);
+}
+
+.help-icon-popup {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  background: white;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+  z-index: 1000;
+  min-width: 280px;
+  max-width: 350px;
+  animation: slideDown 0.2s ease;
+}
+
+.help-icon-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1rem;
+  border-bottom: 1px solid #f0f0f0;
+  background: #f9f9f9;
+}
+
+.help-icon-header h4 {
+  margin: 0;
+  color: #1a1a1a;
+  font-size: 0.95rem;
+}
+
+.close-btn {
+  background: none;
+  border: none;
+  font-size: 1.2rem;
+  cursor: pointer;
+  color: #999;
+  transition: color 0.2s ease;
+  padding: 0;
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.close-btn:hover {
+  color: #333;
+}
+
+.help-icon-content {
+  padding: 1rem;
+  color: #666;
+  font-size: 0.9rem;
+  line-height: 1.5;
+}
+
+.help-icon-content p {
+  margin: 0.5rem 0;
+}
+
+.help-icon-content p:first-child {
+  margin-top: 0;
+}
+
+.help-icon-content p:last-child {
+  margin-bottom: 0;
+}
+
+/* Contextual Help */
+.contextual-help {
+  padding: 1.2rem;
+  border-radius: 8px;
+  margin: 1rem 0;
+  display: flex;
+  gap: 1rem;
+  border-left: 4px solid;
+}
+
+.help-info {
+  background: #e7f3ff;
+  border-color: #0056b3;
+  color: #003d82;
+}
+
+.help-info svg {
+  color: #0056b3;
+  flex-shrink: 0;
+}
+
+.help-warning {
+  background: #fff3e0;
+  border-color: #ff6f00;
+  color: #6d4c41;
+}
+
+.help-warning svg {
+  color: #ff6f00;
+  flex-shrink: 0;
+}
+
+.help-tip {
+  background: #e8f4f8;
+  border-color: #007bff;
+  color: #004085;
+}
+
+.help-tip svg {
+  color: #007bff;
+  flex-shrink: 0;
+}
+
+.contextual-help-title {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+}
+
+.contextual-help-content {
+  line-height: 1.5;
+}
+
+.contextual-help-content p {
+  margin: 0.5rem 0;
+}
+
+.contextual-help-content ul {
+  margin: 0.5rem 0 0.5rem 1.5rem;
+  padding: 0;
+}
+
+.contextual-help-content li {
+  margin-bottom: 0.4rem;
+}
+
+/* Guide Step */
+.guide-step {
+  display: flex;
+  gap: 1.5rem;
+  padding: 1.5rem;
+  background: #f9f9f9;
+  border-radius: 8px;
+  margin-bottom: 1rem;
+  border: 1px solid #eee;
+}
+
+.step-badge {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 48px;
+  width: 48px;
+  height: 48px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border-radius: 50%;
+  font-weight: bold;
+  font-size: 1.2rem;
+  flex-shrink: 0;
+}
+
+.step-content h4 {
+  margin: 0 0 0.5rem 0;
+  color: #1a1a1a;
+}
+
+.step-content p {
+  margin: 0 0 0.8rem 0;
+  color: #666;
+  line-height: 1.5;
+}
+
+.step-tips {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.step-tip {
+  padding: 0.6rem 0.8rem;
+  background: white;
+  border-left: 3px solid #667eea;
+  border-radius: 4px;
+  color: #333;
+  font-size: 0.9rem;
+}
+
+/* Inline Help */
+.inline-help-wrapper {
+  margin-bottom: 1.5rem;
+}
+
+.inline-help-wrapper label {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: #333;
+  font-weight: 500;
+  margin-bottom: 0.5rem;
+}
+
+.inline-help-toggle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  background: #667eea;
+  color: white;
+  border: none;
+  border-radius: 50%;
+  cursor: pointer;
+  font-size: 0.8rem;
+  font-weight: bold;
+  transition: all 0.2s ease;
+}
+
+.inline-help-toggle:hover {
+  background: #5568d3;
+  transform: scale(1.1);
+}
+
+.inline-help-text {
+  padding: 1rem;
+  background: #f0f7ff;
+  border-left: 3px solid #007bff;
+  border-radius: 4px;
+  color: #004085;
+  font-size: 0.9rem;
+  line-height: 1.5;
+  animation: slideDown 0.2s ease;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .help-icon-popup {
+    position: fixed;
+    top: auto;
+    right: 1rem;
+    bottom: 1rem;
+    left: 1rem;
+    max-width: none;
+  }
+
+  .guide-step {
+    flex-direction: column;
+  }
+
+  .step-badge {
+    align-self: center;
+  }
+
+  .tooltip-content {
+    white-space: normal;
+    max-width: 200px;
+  }
+}

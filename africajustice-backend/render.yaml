@@ -1,0 +1,23 @@
+services:
+  - type: web
+    name: justicechain-backend
+    runtime: node
+    rootDir: africajustice-backend
+    buildCommand: npm ci --include=dev && npm run build
+    startCommand: npm start
+    memoryLimit: 1GB
+    disk:
+      name: justicechain_data
+      size: 10GB
+      mountPath: /data
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: NPM_CONFIG_PRODUCTION
+        value: "false"
+      - key: PORT
+        value: 5000
+      - key: RECORDINGS_DIR
+        value: /data/recordings
+      - key: THUMBNAILS_DIR
+        value: /data/thumbnails
