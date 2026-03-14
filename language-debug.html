@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Language Dropdown Debug</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 { color: #333; }
+        .code-block {
+            background: #f0f0f0;
+            padding: 15px;
+            border-radius: 5px;
+            font-family: 'Courier New', monospace;
+            overflow-x: auto;
+            margin: 15px 0;
+            font-size: 13px;
+        }
+        .status {
+            margin: 20px 0;
+            padding: 15px;
+            border-radius: 5px;
+        }
+        .status.error {
+            background: #fee;
+            border-left: 4px solid #f00;
+        }
+        .status.success {
+            background: #efe;
+            border-left: 4px solid #0f0;
+        }
+        .status.warning {
+            background: #ffd;
+            border-left: 4px solid #fa0;
+        }
+        .languages-list {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            margin: 20px 0;
+        }
+        .language-item {
+            padding: 10px;
+            background: #e8f4f8;
+            border-radius: 5px;
+            border: 1px solid #b8d4dc;
+        }
+        .language-item.missing {
+            background: #f8e8e8;
+            border-color: #dcb8b8;
+        }
+        button {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+            margin-top: 20px;
+        }
+        button:hover {
+            background: #0056b3;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔍 Language Dropdown Debug Tool</h1>
+        
+        <div id="instructions" class="status warning">
+            <strong>Instructions:</strong>
+            <ol>
+                <li>Open your browser's Developer Tools (F12)</li>
+                <li>Go to Console tab</li>
+                <li>Run this command:
+                    <div class="code-block">fetch('https://justice-chain-frontend.vercel.app/').then(r => r.text()).then(text => {
+    const parser = new DOMParser();
+    const doc = parser.parseFromString(text, 'text/html');
+    console.log('Page loaded');
+});</div>
+                </li>
+                <li>Then check what's in localStorage:
+                    <div class="code-block">console.log(localStorage.getItem('language'))</div>
+                </li>
+            </ol>
+        </div>
+
+        <h2>Expected Languages (9 total):</h2>
+        <div class="languages-list">
+            <div class="language-item">✅ English (en)</div>
+            <div class="language-item">✅ Français (fr)</div>
+            <div class="language-item">✅ Español (es)</div>
+            <div class="language-item">✅ Kiswahili (sw)</div>
+            <div class="language-item">✅ Português (pt)</div>
+            <div class="language-item">✅ አማርኛ (am)</div>
+            <div class="language-item missing">❌ Hausa (ha) - NEW</div>
+            <div class="language-item missing">❌ Yoruba (yo) - NEW</div>
+            <div class="language-item missing">❌ Igbo (ig) - NEW</div>
+        </div>
+
+        <h2>Troubleshooting Steps:</h2>
+        <div id="steps">
+            <div class="status warning">
+                <h3>Step 1: Check if Vercel deployment is complete</h3>
+                <p>Visit: <a href="https://vercel.com/dashboard" target="_blank">https://vercel.com/dashboard</a></p>
+                <p>Look for "justice-chain-frontend" and check the deployment status:</p>
+                <ul>
+                    <li>🟢 Ready = deployment complete</li>
+                    <li>🟡 Building = still deploying (wait 2-5 min)</li>
+                    <li>🔴 Failed = deployment failed (check logs)</li>
+                </ul>
+            </div>
+
+            <div class="status warning">
+                <h3>Step 2: Force clear browser cache</h3>
+                <p>Press: <strong>Ctrl + Shift + Delete</strong> (Windows) or <strong>Cmd + Shift + Delete</strong> (Mac)</p>
+                <p>Then select "All time" and clear cache</p>
+                <p>Or use Incognito/Private browsing mode</p>
+            </div>
+
+            <div class="status warning">
+                <h3>Step 3: Check browser console for errors</h3>
+                <p>Open DevTools (F12) → Console tab</p>
+                <p>Look for any red error messages</p>
+                <p>Screenshot and share errors if any</p>
+            </div>
+
+            <div class="status warning">
+                <h3>Step 4: Test the language dropout directly</h3>
+                <ol>
+                    <li>Open DevTools Console</li>
+                    <li>Paste this code:
+                        <div class="code-block">
+// Check what languages are loaded
+const script = document.querySelector('script[type="module"]');
+if (script) {
+    console.log('Main app script found');
+}
+
+// Force refresh and check
+console.log('Try opening Network tab and refreshing page');
+console.log('Look for any failed requests (404 errors)');
+                        </div>
+                    </li>
+                </ol>
+            </div>
+
+            <div class="status warning">
+                <h3>Step 5: Verify source code on GitHub</h3>
+                <p>Visit: <a href="https://github.com/Chizzymike48/Justice-Chain-backend/blob/main/africajustice-frontend/src/services/i18nService.ts" target="_blank">i18nService.ts on GitHub</a></p>
+                <p>Should show all 9 languages</p>
+            </div>
+        </div>
+
+        <h2>Quick Check - What You Should See:</h2>
+        <div class="code-block">
+// If deployment worked, this should show 9 languages:
+LANGUAGES = {
+  en: 'English',
+  fr: 'Français',
+  es: 'Español',
+  sw: 'Kiswahili',
+  pt: 'Português',
+  am: 'አማርኛ',
+  ha: 'Hausa',        ← NEW
+  yo: 'Yoruba',       ← NEW
+  ig: 'Igbo'          ← NEW
+}
+        </div>
+
+        <h2>If Still Missing:</h2>
+        <div class="status error">
+            <p><strong>The three languages might not be visible because:</strong></p>
+            <ul>
+                <li>❌ Vercel deployment is still in progress (check dashboard)</li>
+                <li>❌ Browser cache not cleared (try incognito mode)</li>
+                <li>❌ CDN cache hasn't updated (wait 5-10 min)</li>
+                <li>❌ Deployment failed silently (check Vercel logs)</li>
+            </ul>
+        </div>
+
+        <button onclick="location.href='https://justice-chain-frontend.vercel.app/'">
+            🔄 Go to Live App (Refresh after checking above)
+        </button>
+
+        <button onclick="location.href='https://vercel.com/dashboard'">
+            📊 Check Vercel Deployment Status
+        </button>
+    </div>
+</body>
+</html>
