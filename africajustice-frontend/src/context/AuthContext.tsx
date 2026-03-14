@@ -1,4 +1,5 @@
-import { createContext, useState, useContext, ReactNode, FC } from 'react'
+import { createContext, useState, useContext, useEffect, ReactNode, FC } from 'react'
+import authService from '../services/authService'
 
 interface User {
   id?: string
@@ -69,6 +70,42 @@ export const AuthProvider: FC<AuthProviderProps> = ({ children }) => {
     localStorage.removeItem('user')
     localStorage.removeItem(AUTH_TOKEN_KEY)
   }
+
+  // Validate stored token on mount
+  useEffect(() => {
+    const validateToken = async () => {
+      if (!isLoggedIn || !user?.token) {
+        return
+      }
+
+      try {
+        // Use api directly for /me which will use interceptor token
+        const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:5000/api/v1'}/auth/me`, {
+          headers: {
+            'Authorization': `Bearer ${user.token}`,
+            'Content-Type': 'application/json',
+          },
+        })
+
+        if (!response.ok) {
+          if (response.status === 401) {
+            console.warn('Token invalid/expired, logging out')
+            logout()
+          }
+          return
+        }
+
+        // Token valid, optionally refresh user data
+        const data = await response.json()
+        setUser(prev => prev ? ({ ...prev, ...data.data }) : null)
+      } catch (error) {
+        console.error('Token validation failed:', error)
+        logout()
+      }
+    }
+
+    validateToken()
+  }, [])
 
   const value: AuthContextType = {
     isLoggedIn,

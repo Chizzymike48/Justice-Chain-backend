@@ -115,7 +115,7 @@ export class VirusScanService {
     try {
       // VirusTotal API v3 - analyze file
       const formData = new FormData()
-      const blob = new Blob([fileBuffer], { type: 'application/octet-stream' })
+      const blob = new Blob([Buffer.isBuffer(fileBuffer) ? new Uint8Array(fileBuffer) : fileBuffer], { type: 'application/octet-stream' })
       formData.append('file', blob, fileName)
 
       const response = await axios.post('https://www.virustotal.com/api/v3/files', formData, {

@@ -113,7 +113,7 @@ export async function generateReportPDF(
       }
 
       doc.end()
-      resolve(doc)
+      resolve(doc as any)
     } catch (error) {
       reject(error)
     }
@@ -166,7 +166,7 @@ export async function generateBulkReportsPDF(
       })
 
       doc.end()
-      resolve(doc)
+      resolve(doc as any)
     } catch (error) {
       reject(error)
     }
@@ -252,7 +252,7 @@ export async function generateAnalyticsPDF(
       }
 
       doc.end()
-      resolve(doc)
+      resolve(doc as any)
     } catch (error) {
       reject(error)
     }

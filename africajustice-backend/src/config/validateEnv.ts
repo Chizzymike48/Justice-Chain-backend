@@ -7,22 +7,29 @@ const validateEnv = (): void => {
     return
   }
 
-  const REQUIRED_ENV = ['MONGODB_URI', 'JWT_SECRET']
-  const REQUIRED_PROD_ENV = ['STREAM_INGEST_BASE_URL', 'STREAM_PLAYBACK_BASE_URL']
+  const REQUIRED_ALWAYS = ['JWT_SECRET']
+  const OPTIONAL_DB = ['MONGODB_URI']
+  const REQUIRED_PROD = ['STREAM_INGEST_BASE_URL', 'STREAM_PLAYBACK_BASE_URL']
 
-  const required = [...REQUIRED_ENV]
+  const required = [...REQUIRED_ALWAYS]
   if (process.env.NODE_ENV === 'production') {
-    required.push(...REQUIRED_PROD_ENV)
+    required.push(...REQUIRED_PROD)
   }
 
-  const missing = required.filter((key) => !process.env[key])
+  const missingRequired = required.filter((key) => !process.env[key])
+  const missingOptional = OPTIONAL_DB.filter((key) => !process.env[key])
 
-  if (missing.length > 0) {
+  if (missingRequired.length > 0) {
     const error = new Error(
-      `Missing required environment variables: ${missing.join(', ')}`
+      `Missing REQUIRED environment variables: ${missingRequired.join(', ')}`
     ) as Error & { statusCode?: number }
     error.statusCode = 500
     throw error
+  }
+
+  if (missingOptional.length > 0) {
+    console.warn(`⚠️ Missing optional vars (graceful fallback): ${missingOptional.join(', ')}`)
+    console.warn('Set ENABLE_MONGO=false to explicitly disable DB features.')
   }
 }
 
