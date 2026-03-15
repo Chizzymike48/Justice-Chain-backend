@@ -623,6 +623,17 @@ const LiveStreamingComponent: FC<LiveStreamingProps> = ({ streamTitle, caseId, o
           background: #f57c00;
         }
 
+        .jc-btn-live-back {
+          background: transparent;
+          color: #fff;
+          border: 1px solid rgba(255, 255, 255, 0.35);
+        }
+
+        .jc-btn-live-back:hover {
+          border-color: rgba(255, 255, 255, 0.6);
+          background: rgba(255, 255, 255, 0.08);
+        }
+
         .jc-livestream-button:disabled {
           opacity: 0.6;
           cursor: not-allowed;
@@ -790,11 +801,14 @@ const LiveStreamingComponent: FC<LiveStreamingProps> = ({ streamTitle, caseId, o
                   ⏺ Start Recording
                 </button>
                 <span className="jc-livestream-hint">Start the livestream to enable recording.</span>
+                <button className="jc-livestream-button jc-btn-live-back" onClick={onClose}>
+                  Back
+                </button>
               </>
             ) : (
               <>
                 <button className="jc-livestream-button jc-btn-live-stop" onClick={handleStopStream}>
-                  ⏹ Stop Streaming
+                  Stop Live Stream
                 </button>
                 {!isRecording ? (
                   <button
@@ -818,6 +832,9 @@ const LiveStreamingComponent: FC<LiveStreamingProps> = ({ streamTitle, caseId, o
                   title={isScreenSharing ? 'Stop screen sharing' : 'Start screen sharing'}
                 >
                   {isScreenSharing ? '⊞ Stop Screen' : '⊡ Share Screen'}
+                </button>
+                <button className="jc-livestream-button jc-btn-live-back" onClick={onClose}>
+                  Back
                 </button>
                 {!isMobile && (
                   <>
