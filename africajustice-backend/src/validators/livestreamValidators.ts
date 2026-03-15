@@ -3,7 +3,13 @@ import { optionalShortText, shortText } from './common'
 
 export const createLiveStreamValidator: ValidationChain[] = [
   shortText('title', 'title', 4, 180),
-  shortText('streamUrl', 'streamUrl', 8, 500),
+  body('streamUrl')
+    .optional({ values: 'falsy' })
+    .isString()
+    .withMessage('streamUrl must be a string.')
+    .trim()
+    .isLength({ min: 8, max: 500 })
+    .withMessage('streamUrl must be between 8 and 500 characters.'),
   optionalShortText('description', 'description', 1200),
   optionalShortText('caseId', 'caseId', 120),
   optionalShortText('userId', 'userId', 120),

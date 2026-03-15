@@ -3,6 +3,7 @@ import { Server, Socket } from 'socket.io'
 
 interface ChatMessage {
   id: string
+  streamId: string
   username: string
   message: string
   timestamp: number
@@ -34,7 +35,11 @@ export const setupLiveStreamHandlers = (io: Server, socket: Socket): void => {
 
   // Handle livestream chat messages
   socket.on('livestream:message', (message: ChatMessage) => {
-    const roomId = `stream_${message.id}`
+    if (!message.streamId) {
+      return
+    }
+
+    const roomId = `stream_${message.streamId}`
     io.to(roomId).emit('livestream:message', {
       ...message,
       id: `${Date.now()}`,

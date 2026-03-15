@@ -4,6 +4,7 @@ import { io, Socket } from 'socket.io-client'
 
 interface ChatMessage {
   id: string
+  streamId: string
   username: string
   message: string
   timestamp: number
@@ -47,7 +48,8 @@ const LiveChatComponent: FC<LiveChatProps> = ({ streamId, caseId }) => {
     socket.on('connect', () => {
       setIsConnected(true)
       // Join stream room
-      socket.emit('livestream:join', { streamId, caseId, userId: user?.id, username: user?.username })
+      const displayName = user?.name || user?.email || 'Anonymous'
+      socket.emit('livestream:join', { streamId, caseId, userId: user?.id, username: displayName })
     })
 
     socket.on('livestream:message', (data: ChatMessage) => {
@@ -76,7 +78,8 @@ const LiveChatComponent: FC<LiveChatProps> = ({ streamId, caseId }) => {
 
     const message: ChatMessage = {
       id: `${Date.now()}`,
-      username: (user?.username as string) || 'Anonymous',
+      streamId,
+      username: user?.name || user?.email || 'Anonymous',
       message: inputValue,
       timestamp: Date.now(),
       role: user?.role,
