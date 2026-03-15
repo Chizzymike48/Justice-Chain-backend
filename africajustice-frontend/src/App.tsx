@@ -1,5 +1,5 @@
-import React, { Suspense, useState } from 'react'
-import { BrowserRouter, Routes, Route, Navigate, useLocation } from 'react-router-dom'
+import React, { Suspense, useEffect, useState } from 'react'
+import { BrowserRouter, Routes, Route, Navigate, useLocation, useNavigate } from 'react-router-dom'
 import './App.css'
 import { AuthProvider } from './context/AuthContext'
 import { I18nProvider } from './context/I18nContext'
@@ -37,6 +37,25 @@ const NavbarShell: React.FC = () => {
   return <Navbar key={location.pathname} />
 }
 
+const RedirectHandler: React.FC = () => {
+  const navigate = useNavigate()
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return
+    const redirectPath = sessionStorage.getItem('jc:redirect')
+    if (redirectPath && redirectPath !== '/' && redirectPath !== window.location.pathname) {
+      sessionStorage.removeItem('jc:redirect')
+      navigate(redirectPath, { replace: true })
+      return
+    }
+    if (redirectPath) {
+      sessionStorage.removeItem('jc:redirect')
+    }
+  }, [navigate])
+
+  return null
+}
+
 // DEPLOYMENT v1.1.0: All 9 languages (EN, FR, ES, SW, PT, AM, HA, YO, IG)
 function App(): React.ReactElement {
   const [showOnboarding, setShowOnboarding] = useState(() => {
@@ -66,8 +85,9 @@ function App(): React.ReactElement {
               Skip to main content
             </a>
             <NavbarShell />
-          <main id="main-content" className="jc-app-main">
-            <Routes>
+            <RedirectHandler />
+            <main id="main-content" className="jc-app-main">
+              <Routes>
               {/* Public Routes - Only Home, Login and Signup */}
               <Route path="/" element={<Home />} />
               <Route path="/livestreams" element={<LiveStreamsPage />} />
@@ -222,11 +242,11 @@ function App(): React.ReactElement {
 
               {/* Catch all - redirect to home */}
               <Route path="*" element={<Navigate to="/" replace />} />
-            </Routes>
-          </main>
-          <FloatingGoLiveButton />
-          <ChatbotWidget />
-        </div>
+              </Routes>
+            </main>
+            <FloatingGoLiveButton />
+            <ChatbotWidget />
+          </div>
         </I18nProvider>
       </AuthProvider>
     </BrowserRouter>
