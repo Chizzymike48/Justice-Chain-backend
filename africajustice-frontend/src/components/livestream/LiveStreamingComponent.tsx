@@ -37,6 +37,8 @@ const LiveStreamingComponent: FC<LiveStreamingProps> = ({ streamTitle, caseId, o
   const [currentQuality, setCurrentQuality] = useState<'low' | 'medium' | 'high'>('high')
   const [networkStats, setNetworkStats] = useState<NetworkStats | null>(null)
   const [isMobile, setIsMobile] = useState(false)
+  const [isRecording, setIsRecording] = useState(false)
+  const [isCameraReady, setIsCameraReady] = useState(false)
 
   // Start camera access with better mobile/desktop support
   const startCamera = async () => {
@@ -83,6 +85,7 @@ const LiveStreamingComponent: FC<LiveStreamingProps> = ({ streamTitle, caseId, o
       if (videoRef.current) {
         videoRef.current.srcObject = stream
         streamRef.current = stream
+        setIsCameraReady(true)
       }
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Failed to access camera'
@@ -108,6 +111,7 @@ const LiveStreamingComponent: FC<LiveStreamingProps> = ({ streamTitle, caseId, o
         console.warn('[Livestream] 💡 Hint: Camera timeout - may be hardware issue')
       }
       
+      setIsCameraReady(false)
       setError(userFriendlyError)
     }
   }
@@ -194,7 +198,6 @@ const LiveStreamingComponent: FC<LiveStreamingProps> = ({ streamTitle, caseId, o
         
         if (livestreamSocketService.isConnected()) {
           clearInterval(connectionCheckInterval)
-          setupMediaRecorder()
           livestreamSocketService.sendStatusUpdate('active')
           setStreamStatus('active')
           setIsStreaming(true)
@@ -278,10 +281,12 @@ const LiveStreamingComponent: FC<LiveStreamingProps> = ({ streamTitle, caseId, o
 
       mediaRecorder.onstart = () => {
         console.log('[Livestream] ▶️ MediaRecorder started')
+        setIsRecording(true)
       }
 
       mediaRecorder.onstop = () => {
         console.log(`[Livestream] ⏹️ MediaRecorder stopped (sent ${chunkCount} chunks)`)
+        setIsRecording(false)
       }
 
       mediaRecorder.onerror = (event) => {
@@ -297,6 +302,32 @@ const LiveStreamingComponent: FC<LiveStreamingProps> = ({ streamTitle, caseId, o
       console.error('[Livestream] ❌ MediaRecorder setup error:', err)
       setError(`Recording Error: ${errorMessage}`)
     }
+  }
+
+  const handleStartRecording = () => {
+    if (!isStreaming || streamStatus !== 'active') {
+      setError('Start the livestream before recording.')
+      return
+    }
+
+    if (!streamRef.current) {
+      setError('Camera not initialized')
+      return
+    }
+
+    if (mediaRecorderRef.current && mediaRecorderRef.current.state !== 'inactive') {
+      setError('Recording is already in progress.')
+      return
+    }
+
+    setupMediaRecorder()
+  }
+
+  const handleStopRecording = () => {
+    if (mediaRecorderRef.current && mediaRecorderRef.current.state !== 'inactive') {
+      mediaRecorderRef.current.stop()
+    }
+    setIsRecording(false)
   }
 
   // Stop streaming
@@ -324,6 +355,7 @@ const LiveStreamingComponent: FC<LiveStreamingProps> = ({ streamTitle, caseId, o
 
       setIsStreaming(false)
       setStreamStatus('stopped')
+      setIsRecording(false)
       setViewerCount(0)
       onClose()
     } catch (err) {
@@ -389,6 +421,7 @@ const LiveStreamingComponent: FC<LiveStreamingProps> = ({ streamTitle, caseId, o
       if (mediaRecorderRef.current && mediaRecorderRef.current.state !== 'inactive') {
         mediaRecorderRef.current.stop()
       }
+      setIsCameraReady(false)
     }
   }, [])
 
@@ -488,6 +521,28 @@ const LiveStreamingComponent: FC<LiveStreamingProps> = ({ streamTitle, caseId, o
           animation: pulse 1s infinite;
         }
 
+        .jc-livestream-badges {
+          display: flex;
+          flex-direction: column;
+          gap: 8px;
+          align-items: flex-end;
+        }
+
+        .jc-livestream-badge {
+          background: rgba(0, 0, 0, 0.7);
+          border: 1px solid rgba(255, 255, 255, 0.2);
+          padding: 6px 10px;
+          border-radius: 999px;
+          font-size: 12px;
+          display: inline-flex;
+          align-items: center;
+          gap: 6px;
+        }
+
+        .jc-livestream-badge.rec {
+          background: rgba(255, 0, 0, 0.7);
+        }
+
         @keyframes pulse {
           0%, 100% { opacity: 1; }
           50% { opacity: 0.5; }
@@ -558,6 +613,15 @@ const LiveStreamingComponent: FC<LiveStreamingProps> = ({ streamTitle, caseId, o
           background: #da190b;
         }
 
+        .jc-btn-record {
+          background: #ff9800;
+          color: #111;
+        }
+
+        .jc-btn-record:hover:not(:disabled) {
+          background: #f57c00;
+        }
+
         .jc-livestream-button:disabled {
           opacity: 0.6;
           cursor: not-allowed;
@@ -610,8 +674,8 @@ const LiveStreamingComponent: FC<LiveStreamingProps> = ({ streamTitle, caseId, o
           }
 
           .jc-livestream-sidebar {
-            order: -1;
-            display: none;
+            order: 2;
+            display: flex;
           }
 
           .jc-livestream-button {
@@ -667,6 +731,20 @@ const LiveStreamingComponent: FC<LiveStreamingProps> = ({ streamTitle, caseId, o
                 <span className="jc-livestream-status-dot" />
                 LIVE
               </div>
+              <div className="jc-livestream-badges">
+                <div className="jc-livestream-badge">
+                  👥 {viewerCount} watching
+                </div>
+                {isRecording ? (
+                  <div className="jc-livestream-badge rec">
+                    ● Recording
+                  </div>
+                ) : (
+                  <div className="jc-livestream-badge">
+                    Recording off
+                  </div>
+                )}
+              </div>
             </div>
           )}
         </div>
@@ -701,6 +779,19 @@ const LiveStreamingComponent: FC<LiveStreamingProps> = ({ streamTitle, caseId, o
                 <button className="jc-livestream-button jc-btn-live-stop" onClick={handleStopStream}>
                   ⏹ Stop Streaming
                 </button>
+                {!isRecording ? (
+                  <button
+                    className="jc-livestream-button jc-btn-record"
+                    onClick={handleStartRecording}
+                    disabled={!isCameraReady || streamStatus !== 'active'}
+                  >
+                    ⏺ Start Recording
+                  </button>
+                ) : (
+                  <button className="jc-livestream-button jc-btn-record" onClick={handleStopRecording}>
+                    ⏹ Stop Recording
+                  </button>
+                )}
                 <button
                   className="jc-livestream-button"
                   onClick={handleScreenShare}
