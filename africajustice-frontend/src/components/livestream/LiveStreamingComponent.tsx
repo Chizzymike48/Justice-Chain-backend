@@ -400,8 +400,8 @@ const LiveStreamingComponent: FC<LiveStreamingProps> = ({ streamTitle, caseId, o
           border-radius: 8px;
           overflow: hidden;
           width: 100%;
-          max-width: 600px;
-          height: 400px;
+          max-width: 480px;
+          height: 280px;
           margin: 0 auto;
         }
 
@@ -414,7 +414,7 @@ const LiveStreamingComponent: FC<LiveStreamingProps> = ({ streamTitle, caseId, o
 
         .jc-livestream-controls-bar {
           width: 100%;
-          max-width: 600px;
+          max-width: 480px;
           display: flex;
           flex-direction: column;
           gap: 12px;
@@ -484,7 +484,8 @@ const LiveStreamingComponent: FC<LiveStreamingProps> = ({ streamTitle, caseId, o
           flex-direction: column;
           gap: 15px;
           width: 100%;
-          max-width: 600px;
+          max-width: 480px;
+          margin: 0 auto;
         }
 
         .jc-livestream-title {
