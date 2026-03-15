@@ -483,8 +483,8 @@ const LiveStreamingComponent: FC<LiveStreamingProps> = ({ streamTitle, caseId, o
           border-radius: 8px;
           overflow: hidden;
           width: 100%;
-          max-width: 920px;
-          height: clamp(220px, 45vh, 520px);
+          max-width: 820px;
+          height: clamp(200px, 40vh, 460px);
           margin: 0 auto;
         }
 
@@ -495,27 +495,12 @@ const LiveStreamingComponent: FC<LiveStreamingProps> = ({ streamTitle, caseId, o
           transform: scaleX(-1);
         }
 
-        .jc-livestream-overlay-controls {
-          position: absolute;
-          left: 16px;
-          right: 16px;
-          bottom: 16px;
-          display: flex;
-          flex-direction: column;
+        .jc-livestream-controls-bar {
+          width: 100%;
+          max-width: 820px;
+          display: grid;
           gap: 8px;
-          padding: 10px;
-          border-radius: 12px;
-          background: rgba(0, 0, 0, 0.55);
-          border: 1px solid rgba(255, 255, 255, 0.15);
-          backdrop-filter: blur(6px);
-          z-index: 20;
-        }
-
-        .jc-livestream-control-row {
-          display: flex;
-          gap: 10px;
-          flex-wrap: wrap;
-          align-items: center;
+          margin: 0 auto;
         }
 
         .jc-livestream-header {
@@ -581,7 +566,7 @@ const LiveStreamingComponent: FC<LiveStreamingProps> = ({ streamTitle, caseId, o
           flex-direction: column;
           gap: 15px;
           width: 100%;
-          max-width: 920px;
+          max-width: 820px;
         }
 
         .jc-livestream-title {
@@ -614,6 +599,15 @@ const LiveStreamingComponent: FC<LiveStreamingProps> = ({ streamTitle, caseId, o
           gap: 10px;
           flex-wrap: wrap;
           align-items: center;
+          justify-content: center;
+        }
+
+        .jc-livestream-info > .jc-livestream-controls {
+          display: none;
+        }
+
+        .jc-livestream-overlay-controls {
+          display: none;
         }
 
         .jc-livestream-advanced {
@@ -743,16 +737,13 @@ const LiveStreamingComponent: FC<LiveStreamingProps> = ({ streamTitle, caseId, o
             gap: 8px;
           }
 
-          .jc-livestream-overlay-controls {
-            left: 10px;
-            right: 10px;
-            bottom: 10px;
-            padding: 8px;
-          }
-
-          .jc-livestream-control-row {
+          .jc-livestream-controls {
             flex-direction: column;
             align-items: stretch;
+          }
+
+          .jc-livestream-controls-bar {
+            max-width: 100%;
           }
         }
 
@@ -786,6 +777,104 @@ const LiveStreamingComponent: FC<LiveStreamingProps> = ({ streamTitle, caseId, o
 
       <div className="jc-livestream-main">
         {error && <div className="jc-livestream-error">{error}</div>}
+
+        <div className="jc-livestream-controls-bar">
+          {isStreaming && (
+            <div className="jc-livestream-advanced">
+              <button
+                className="jc-livestream-button"
+                onClick={handleScreenShare}
+                style={{
+                  background: isScreenSharing ? '#2196F3' : '#333',
+                }}
+                title={isScreenSharing ? 'Stop screen sharing' : 'Start screen sharing'}
+              >
+                {isScreenSharing ? 'âŠž Stop Screen' : 'âŠ¡ Share Screen'}
+              </button>
+              {!isMobile && (
+                <>
+                  <button
+                    className="jc-livestream-button"
+                    onClick={() => handleQualityChange('low')}
+                    style={{
+                      background: currentQuality === 'low' ? '#FF9800' : '#333',
+                    }}
+                  >
+                    480p
+                  </button>
+                  <button
+                    className="jc-livestream-button"
+                    onClick={() => handleQualityChange('medium')}
+                    style={{
+                      background: currentQuality === 'medium' ? '#FF9800' : '#333',
+                    }}
+                  >
+                    720p
+                  </button>
+                  <button
+                    className="jc-livestream-button"
+                    onClick={() => handleQualityChange('high')}
+                    style={{
+                      background: currentQuality === 'high' ? '#FF9800' : '#333',
+                    }}
+                  >
+                    1080p
+                  </button>
+                </>
+              )}
+            </div>
+          )}
+
+          <div className="jc-livestream-controls">
+            {!isStreaming ? (
+              <>
+                <button
+                  className="jc-livestream-button jc-btn-live-start"
+                  onClick={handleStartStream}
+                  disabled={isCreatingStream}
+                >
+                  {isCreatingStream ? 'Starting...' : 'â— Start Live Stream'}
+                </button>
+                <button
+                  className="jc-livestream-button jc-btn-record"
+                  onClick={handleStartRecording}
+                  disabled
+                  title="Start the livestream first"
+                >
+                  âº Start Recording
+                </button>
+                <button className="jc-livestream-button jc-btn-live-back" onClick={onClose}>
+                  Back
+                </button>
+              </>
+            ) : (
+              <>
+                <button className="jc-livestream-button jc-btn-live-stop" onClick={handleStopStream}>
+                  Stop Live Stream
+                </button>
+                {!isRecording ? (
+                  <button
+                    className="jc-livestream-button jc-btn-record"
+                    onClick={handleStartRecording}
+                    disabled={!isCameraReady || streamStatus !== 'active'}
+                  >
+                    âº Start Recording
+                  </button>
+                ) : (
+                  <button className="jc-livestream-button jc-btn-record" onClick={handleStopRecording}>
+                    â¹ Stop Recording
+                  </button>
+                )}
+                <button className="jc-livestream-button jc-btn-live-back" onClick={onClose}>
+                  Back
+                </button>
+              </>
+            )}
+          </div>
+          {!isStreaming && (
+            <span className="jc-livestream-hint">Start the livestream to enable recording.</span>
+          )}
+        </div>
 
         <div className="jc-livestream-video">
           <video ref={videoRef} autoPlay playsInline muted />
