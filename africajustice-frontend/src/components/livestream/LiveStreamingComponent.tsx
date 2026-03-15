@@ -583,6 +583,7 @@ const LiveStreamingComponent: FC<LiveStreamingProps> = ({ streamTitle, caseId, o
           display: flex;
           gap: 10px;
           flex-wrap: wrap;
+          align-items: center;
         }
 
         .jc-livestream-button {
@@ -625,6 +626,11 @@ const LiveStreamingComponent: FC<LiveStreamingProps> = ({ streamTitle, caseId, o
         .jc-livestream-button:disabled {
           opacity: 0.6;
           cursor: not-allowed;
+        }
+
+        .jc-livestream-hint {
+          font-size: 12px;
+          color: #aaa;
         }
 
         .jc-livestream-sidebar {
@@ -767,13 +773,24 @@ const LiveStreamingComponent: FC<LiveStreamingProps> = ({ streamTitle, caseId, o
 
           <div className="jc-livestream-controls">
             {!isStreaming ? (
-              <button
-                className="jc-livestream-button jc-btn-live-start"
-                onClick={handleStartStream}
-                disabled={isCreatingStream}
-              >
-                {isCreatingStream ? 'Starting...' : '● Start Live Stream'}
-              </button>
+              <>
+                <button
+                  className="jc-livestream-button jc-btn-live-start"
+                  onClick={handleStartStream}
+                  disabled={isCreatingStream}
+                >
+                  {isCreatingStream ? 'Starting...' : '● Start Live Stream'}
+                </button>
+                <button
+                  className="jc-livestream-button jc-btn-record"
+                  onClick={handleStartRecording}
+                  disabled
+                  title="Start the livestream first"
+                >
+                  ⏺ Start Recording
+                </button>
+                <span className="jc-livestream-hint">Start the livestream to enable recording.</span>
+              </>
             ) : (
               <>
                 <button className="jc-livestream-button jc-btn-live-stop" onClick={handleStopStream}>
