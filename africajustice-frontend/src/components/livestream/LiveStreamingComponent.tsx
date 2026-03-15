@@ -465,14 +465,15 @@ const LiveStreamingComponent: FC<LiveStreamingProps> = ({ streamTitle, caseId, o
           padding: 20px;
           background: #1a1a1a;
           color: white;
-          height: 100vh;
-          overflow: hidden;
+          min-height: 100vh;
+          align-items: start;
         }
 
         .jc-livestream-main {
           display: flex;
           flex-direction: column;
           gap: 20px;
+          min-height: 0;
         }
 
         .jc-livestream-video {
@@ -480,7 +481,7 @@ const LiveStreamingComponent: FC<LiveStreamingProps> = ({ streamTitle, caseId, o
           background: #000;
           border-radius: 8px;
           overflow: hidden;
-          flex: 1;
+          height: clamp(260px, 55vh, 640px);
         }
 
         .jc-livestream-video video {
@@ -688,6 +689,7 @@ const LiveStreamingComponent: FC<LiveStreamingProps> = ({ streamTitle, caseId, o
           .jc-livestream-video {
             min-height: 250px;
             aspect-ratio: 9 / 16;
+            height: auto;
           }
 
           .jc-livestream-sidebar {
