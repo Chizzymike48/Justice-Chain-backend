@@ -5,18 +5,13 @@ import { createAdapter } from '@socket.io/redis-adapter'
 import app from './app'
 import { registerSocketHandlers } from './socket/socketHandlers'
 import { setSocketServer } from './socket/socketRegistry'
+import { buildSocketCorsOptions } from './config/cors'
 
 const PORT = process.env.PORT || 5000
-const socketAllowedOrigins = process.env.CORS_ORIGIN
-  ? process.env.CORS_ORIGIN.split(',').map((origin) => origin.trim()).filter(Boolean)
-  : ['http://localhost:5173', 'http://localhost:3000']
 
 const server = http.createServer(app)
 const io = new Server(server, {
-  cors: {
-    origin: socketAllowedOrigins,
-    credentials: true,
-  },
+  cors: buildSocketCorsOptions(),
 })
 
 setSocketServer(io)

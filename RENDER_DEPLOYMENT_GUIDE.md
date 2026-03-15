@@ -18,8 +18,9 @@
   - Health check: `/healthz` endpoint exists
 
 ### 2. **Verified CORS Setup**
-- ✅ Backend CORS configured in `app.ts` (line 48-51)
-- ✅ Accepts `CORS_ORIGIN` env var with comma-separated origins
+- ✅ Backend CORS centralized in `src/config/cors.ts`
+- ✅ Accepts `CORS_ORIGIN` env var with comma-separated origins (supports wildcards)
+- ✅ Optional `CORS_ALLOW_VERCEL_PREVIEWS` to allow `*.vercel.app` previews
 - ✅ Fallbacks to localhost for development
 
 ### 3. **Confirmed API Integration**
@@ -81,6 +82,7 @@ JWT_SECRET=<GENERATE-NEW-STRONG-SECRET-MIN-32-CHARS>
 MONGODB_URI=<YOUR-NEW-MONGODB-CONNECTION-STRING>
 REDIS_URL=<YOUR-UPSTASH-REDIS-OR-LOCAL>
 CORS_ORIGIN=https://justicechain-frontend.onrender.com
+CORS_ALLOW_VERCEL_PREVIEWS=true
 
 # AWS S3 (if using file uploads)
 AWS_S3_BUCKET=justicechain
@@ -154,7 +156,8 @@ VITE_API_URL=https://justicechain-backend.onrender.com/api/v1
 Go back to backend service → **Environment** → Edit `CORS_ORIGIN`:
 
 ```
-CORS_ORIGIN=https://justicechain-frontend.onrender.com
+CORS_ORIGIN=https://justicechain-frontend.onrender.com,https://*.vercel.app
+CORS_ALLOW_VERCEL_PREVIEWS=true
 ```
 
 **Save & redeploy backend** (should auto-trigger)
@@ -198,7 +201,8 @@ curl https://justicechain-backend.onrender.com/healthz
 | `JWT_SECRET` | (32+ chars) | Generate: `openssl rand -hex 32` |
 | `NODE_ENV` | `production` | Set by Render |
 | `PORT` | `5000` | Auto set by Render |
-| `CORS_ORIGIN` | `https://...onrender.com` | Frontend URL |
+| `CORS_ORIGIN` | `https://...onrender.com` | Frontend URL (comma-separated, wildcards allowed) |
+| `CORS_ALLOW_VERCEL_PREVIEWS` | `true` | Allow `*.vercel.app` previews |
 
 ### Backend Database (Choose One)
 | Variable | Example | Notes |
@@ -226,8 +230,9 @@ curl https://justicechain-backend.onrender.com/healthz
 ### 🔴 "CORS error in browser console"
 **Solution:**
 1. Verify frontend URL in `CORS_ORIGIN` backend env var
-2. Ensure frontend and backend are deployed
-3. Redeploy backend after CORS change
+2. For Vercel previews, add `https://*.vercel.app` and set `CORS_ALLOW_VERCEL_PREVIEWS=true`
+3. Ensure frontend and backend are deployed
+4. Redeploy backend after CORS change
 
 ### 🔴 "Backend taking too long to start"
 **Cause:** MongoDB connection timeout

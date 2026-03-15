@@ -1,5 +1,6 @@
 import { createContext, useState, useContext, useEffect, useCallback, ReactNode, FC } from 'react'
 import { setSentryUser, clearSentryUser } from '../utils/sentry'
+import { API_BASE_URL } from '../services/api'
 
 interface User {
   id?: string
@@ -84,7 +85,7 @@ export const AuthProvider: FC<AuthProviderProps> = ({ children }) => {
 
       try {
         // Use api directly for /me which will use interceptor token
-        const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:5000/api/v1'}/auth/me`, {
+        const response = await fetch(`${API_BASE_URL}/auth/me`, {
           headers: {
             'Authorization': `Bearer ${user.token}`,
             'Content-Type': 'application/json',

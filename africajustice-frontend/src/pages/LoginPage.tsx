@@ -48,8 +48,8 @@ const LoginPage: FC = () => {
         token: response.token,
       })
       navigate(nextPath, { replace: true })
-    } catch {
-      setError('Login failed. Please verify your credentials or backend connection.')
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Login failed. Please verify your credentials or backend connection.')
     } finally {
       setLoading(false)
     }

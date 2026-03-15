@@ -11,6 +11,7 @@ import validateEnv from './config/validateEnv'
 import connectDB from './config/database'
 import { connectRedis, getRedisClient } from './config/redis'
 import { initializeSentry, setupSentryMiddleware, setupSentryErrorHandler } from './config/sentry'
+import { buildCorsOptions } from './config/cors'
 import errorHandler from './middleware/errorHandler'
 import { generalLimiter } from './middleware/rateLimit'
 import { setupSwagger } from './config/swagger'
@@ -38,10 +39,6 @@ const recordingsDir = process.env.RECORDINGS_DIR
 const thumbnailsDir = process.env.THUMBNAILS_DIR
   ? path.resolve(process.env.THUMBNAILS_DIR)
   : path.join(process.cwd(), 'thumbnails')
-const allowedOrigins = process.env.CORS_ORIGIN
-  ? process.env.CORS_ORIGIN.split(',').map((origin) => origin.trim()).filter(Boolean)
-  : ['http://localhost:5173', 'http://localhost:3000']
-
 if (process.env.NODE_ENV !== 'test') {
   validateEnv()
   connectDB().catch(() =>
@@ -81,12 +78,7 @@ if (process.env.NODE_ENV !== 'test') {
 setupSentryMiddleware(app)
 
 app.use(helmet())
-app.use(
-  cors({
-    origin: allowedOrigins,
-    credentials: true,
-  })
-)
+app.use(cors(buildCorsOptions()))
 app.use(express.json({ limit: '10mb' }))
 app.use(express.urlencoded({ extended: true, limit: '10mb' }))
 app.use(cookieParser())
