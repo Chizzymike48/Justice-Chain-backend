@@ -46,7 +46,6 @@ const LiveStreamingComponent: FC<LiveStreamingProps> = ({ streamTitle, caseId, o
       setError(null)
       console.log('[Livestream] 📷 Requesting camera access...')
       
-      // Different constraints for mobile vs desktop
       const isMobileDevice = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
         navigator.userAgent
       )
@@ -58,14 +57,12 @@ const LiveStreamingComponent: FC<LiveStreamingProps> = ({ streamTitle, caseId, o
         constraints = {
           audio: true,
           video: {
-            facingMode: 'environment', // Back camera on mobile
+            facingMode: 'environment',
             width: { ideal: 720 },
             height: { ideal: 1280 },
           },
         }
-        console.log('[Livestream] 📱 Mobile device detected, using back camera')
       } else {
-        // For desktop: try 1080p first, then fallback to 720p
         constraints = {
           audio: true,
           video: {
@@ -73,15 +70,9 @@ const LiveStreamingComponent: FC<LiveStreamingProps> = ({ streamTitle, caseId, o
             height: { ideal: 1080, min: 480 },
           },
         }
-        console.log('[Livestream] 💻 Desktop device detected, requesting 1080p')
       }
 
       const stream = await navigator.mediaDevices.getUserMedia(constraints)
-      console.log('[Livestream] ✅ Camera access granted')
-      console.log('[Livestream] Device type:', isMobileDevice ? 'Mobile' : 'Desktop')
-      console.log('[Livestream] Video tracks:', stream.getVideoTracks().length)
-      console.log('[Livestream] Audio tracks:', stream.getAudioTracks().length)
-
       if (videoRef.current) {
         videoRef.current.srcObject = stream
         streamRef.current = stream
@@ -89,26 +80,10 @@ const LiveStreamingComponent: FC<LiveStreamingProps> = ({ streamTitle, caseId, o
       }
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Failed to access camera'
-      console.error('[Livestream] ❌ Camera access error:', err)
-      
-      // Provide helpful hints based on error type
       let userFriendlyError = `Camera Error: ${errorMessage}`
       
       if (errorMessage.includes('Permission') || errorMessage.includes('denied')) {
-        userFriendlyError = '❌ Camera permission denied. Please:\n1. Check browser permissions\n2. Go to Settings → Privacy & Security\n3. Allow camera access for this site\n4. Refresh and try again'
-        console.warn('[Livestream] 💡 Hint: Camera permission denied - check browser settings')
-      } else if (errorMessage.includes('NotFound')) {
-        userFriendlyError = '❌ No camera found. Please:\n1. Check if camera is connected\n2. Close other apps using the camera\n3. Try a different USB port\n4. Restart your browser'
-        console.warn('[Livestream] 💡 Hint: No camera device found - check hardware')
-      } else if (errorMessage.includes('NotSupported')) {
-        userFriendlyError = '❌ Camera not supported. Please:\n1. Use Chrome, Firefox, or Edge\n2. Ensure site is using HTTPS (not HTTP)\n3. Update your browser'
-        console.warn('[Livestream] 💡 Hint: Camera not supported - try different browser or HTTPS')
-      } else if (errorMessage.includes('NotAllowed') || errorMessage.includes('PermissionDenied')) {
-        userFriendlyError = '❌ Permission denied. System blocked this app from accessing camera.\nTry: Settings → Privacy → Camera'
-        console.warn('[Livestream] 💡 Hint: System permission denied for camera')
-      } else if (errorMessage.includes('Timeout')) {
-        userFriendlyError = '❌ Camera access timeout. Try:\n1. Unplugging and re-plugging camera\n2. Restarting browser\n3. Checking device manager for errors'
-        console.warn('[Livestream] 💡 Hint: Camera timeout - may be hardware issue')
+        userFriendlyError = 'Camera permission denied. Check browser settings and allow camera access.'
       }
       
       setIsCameraReady(false)
@@ -116,16 +91,10 @@ const LiveStreamingComponent: FC<LiveStreamingProps> = ({ streamTitle, caseId, o
     }
   }
 
-  // Get current location (non-blocking, optional feature)
+  // Get current location
   const getLocation = () => {
-    if (!navigator.geolocation) {
-      console.warn('[Livestream] ⚠️ Geolocation not supported, continuing without location')
-      return
-    }
+    if (!navigator.geolocation) return
 
-    console.log('[Livestream] 📍 Requesting location...')
-    
-    // Use getCurrentPosition with longer timeout for better success rate
     navigator.geolocation.getCurrentPosition(
       (position) => {
         setLocation({
@@ -134,23 +103,19 @@ const LiveStreamingComponent: FC<LiveStreamingProps> = ({ streamTitle, caseId, o
           accuracy: position.coords.accuracy,
           timestamp: Date.now(),
         })
-        console.log('[Livestream] ✅ Location acquired:', position.coords.latitude, position.coords.longitude)
-        setError(null)
       },
-      (err) => {
-        // Don't block streaming if location fails - it's optional
-        console.warn('[Livestream] ⚠️ Location error (non-blocking):', err.message)
-        // Don't set error state - location is optional for streaming
+      () => {
+        // Don't block on location error
       },
       {
-        enableHighAccuracy: false, // Less strict for faster response
-        maximumAge: 300000, // Use 5-minute cached location if available
-        timeout: 10000, // Longer timeout (10 seconds)
-      },
+        enableHighAccuracy: false,
+        maximumAge: 300000,
+        timeout: 10000,
+      }
     )
   }
 
-  // Start streaming with Socket.io
+  // Start streaming
   const handleStartStream = async () => {
     if (!streamTitle.trim()) {
       setError('Please enter a stream title')
@@ -167,11 +132,9 @@ const LiveStreamingComponent: FC<LiveStreamingProps> = ({ streamTitle, caseId, o
       setError(null)
       setStreamStatus('initializing')
 
-      // Generate unique stream ID
       const newStreamId = `stream-${user?.id}-${Date.now()}`
       setStreamId(newStreamId)
 
-      // Create livestream record in database
       await livestreamService.createLiveStream({
         title: streamTitle,
         description: `Live stream from ${user?.username || 'Anonymous'} | Location: ${
@@ -182,62 +145,50 @@ const LiveStreamingComponent: FC<LiveStreamingProps> = ({ streamTitle, caseId, o
         streamId: newStreamId,
       })
 
-      // Connect Socket.io livestream
       livestreamSocketService.connect(newStreamId, {
         onViewerCount: (count) => setViewerCount(count),
         onStreamEnded: () => handleStopStream(),
         onError: (error) => setError(error),
       })
 
-      // Wait for socket to actually connect with retry logic
       let retries = 0
       const maxRetries = 10
       const connectionCheckInterval = setInterval(() => {
         retries++
-        console.log(`[Livestream] Connection check ${retries}/${maxRetries}, connected: ${livestreamSocketService.isConnected()}`)
         
         if (livestreamSocketService.isConnected()) {
           clearInterval(connectionCheckInterval)
           livestreamSocketService.sendStatusUpdate('active')
           setStreamStatus('active')
           setIsStreaming(true)
-          console.log('[Livestream] ✅ Stream started successfully, recording active')
         } else if (retries >= maxRetries) {
           clearInterval(connectionCheckInterval)
-          setError('Failed to establish streaming connection after multiple attempts')
+          setError('Failed to establish streaming connection')
           setStreamStatus('stopped')
-          console.error('[Livestream] ❌ Connection failed after max retries')
         }
       }, 300)
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Failed to start stream'
       setError(`Stream Error: ${errorMessage}`)
-      console.error('Stream creation error:', err)
       setStreamStatus('stopped')
     } finally {
       setIsCreatingStream(false)
     }
   }
 
-  // Setup MediaRecorder to capture and send video chunks via Socket.io
+  // Setup MediaRecorder
   const setupMediaRecorder = () => {
     if (!streamRef.current) {
-      console.error('[Livestream] ❌ No stream ref available')
       setError('Stream not available for recording')
       return
     }
 
     try {
-      console.log('[Livestream] 🎥 Initializing MediaRecorder...')
-      
-      // Try multiple codec options for maximum browser compatibility
       const codecOptions = [
         'video/webm;codecs=vp9,opus',
         'video/webm;codecs=vp9',
         'video/webm;codecs=vp8,opus',
         'video/webm;codecs=vp8',
-        'video/webm;codecs=h264,opus',
-        'video/webm;codecs=h264',
         'video/webm',
         'video/mp4',
       ]
@@ -246,13 +197,8 @@ const LiveStreamingComponent: FC<LiveStreamingProps> = ({ streamTitle, caseId, o
       for (const mimeType of codecOptions) {
         if (MediaRecorder.isTypeSupported(mimeType)) {
           selectedMimeType = mimeType
-          console.log(`[Livestream] ✅ Using codec: ${mimeType}`)
           break
         }
-      }
-
-      if (!selectedMimeType) {
-        console.warn('[Livestream] ⚠️ No supported MIME type found, using default')
       }
 
       const mediaRecorder = new MediaRecorder(streamRef.current, {
@@ -261,12 +207,16 @@ const LiveStreamingComponent: FC<LiveStreamingProps> = ({ streamTitle, caseId, o
         videoBitsPerSecond: 2500000,
       })
 
-      let chunkCount = 0
+      mediaRecorder.onstart = () => {
+        setIsRecording(true)
+      }
+
+      mediaRecorder.onstop = () => {
+        setIsRecording(false)
+      }
+
       mediaRecorder.ondataavailable = (event) => {
         if (event.data.size > 0) {
-          chunkCount++
-          console.log(`[Livestream] 📤 Sending chunk ${chunkCount} (${(event.data.size / 1024).toFixed(2)} KB)`)
-          
           const reader = new FileReader()
           reader.onload = () => {
             livestreamSocketService.sendStreamChunk({
@@ -279,27 +229,10 @@ const LiveStreamingComponent: FC<LiveStreamingProps> = ({ streamTitle, caseId, o
         }
       }
 
-      mediaRecorder.onstart = () => {
-        console.log('[Livestream] ▶️ MediaRecorder started')
-        setIsRecording(true)
-      }
-
-      mediaRecorder.onstop = () => {
-        console.log(`[Livestream] ⏹️ MediaRecorder stopped (sent ${chunkCount} chunks)`)
-        setIsRecording(false)
-      }
-
-      mediaRecorder.onerror = (event) => {
-        console.error('[Livestream] ❌ MediaRecorder error:', event.error)
-        setError(`Recording Error: ${event.error}`)
-      }
-
-      mediaRecorder.start(1000) // Send chunks every 1 second
+      mediaRecorder.start(1000)
       mediaRecorderRef.current = mediaRecorder
-      console.log('[Livestream] ✅ MediaRecorder setup complete')
     } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Failed to setup media recorder'
-      console.error('[Livestream] ❌ MediaRecorder setup error:', err)
+      const errorMessage = err instanceof Error ? err.message : 'Failed to setup recording'
       setError(`Recording Error: ${errorMessage}`)
     }
   }
@@ -327,27 +260,22 @@ const LiveStreamingComponent: FC<LiveStreamingProps> = ({ streamTitle, caseId, o
     if (mediaRecorderRef.current && mediaRecorderRef.current.state !== 'inactive') {
       mediaRecorderRef.current.stop()
     }
-    setIsRecording(false)
   }
 
   // Stop streaming
   const handleStopStream = async () => {
     try {
-      // Stop media recorder
       if (mediaRecorderRef.current && mediaRecorderRef.current.state !== 'inactive') {
         mediaRecorderRef.current.stop()
       }
 
-      // Notify backend stream stopped
       if (streamId) {
         livestreamSocketService.sendStatusUpdate('stopped')
         await livestreamService.updateLiveStreamStatus(streamId, 'stopped')
       }
 
-      // Disconnect Socket.io
       livestreamSocketService.disconnect()
 
-      // Stop camera tracks
       if (streamRef.current) {
         streamRef.current.getTracks().forEach((track) => track.stop())
         streamRef.current = null
@@ -359,7 +287,6 @@ const LiveStreamingComponent: FC<LiveStreamingProps> = ({ streamTitle, caseId, o
       setViewerCount(0)
       onClose()
     } catch (err) {
-      console.error('Error stopping stream:', err)
       setError('Failed to stop stream properly')
     }
   }
@@ -376,9 +303,7 @@ const LiveStreamingComponent: FC<LiveStreamingProps> = ({ streamTitle, caseId, o
         if (streamRef.current) {
           await screenSharingService.switchToScreenShare(streamRef.current, screenStream)
           setIsScreenSharing(true)
-          streamAnalyticsService.recordStreamShare(streamId || '')
 
-          // Listen for when user stops sharing screen
           const videoTrack = screenStream.getVideoTracks()[0]
           if (videoTrack) {
             videoTrack.addEventListener('ended', () => {
@@ -387,7 +312,6 @@ const LiveStreamingComponent: FC<LiveStreamingProps> = ({ streamTitle, caseId, o
           }
         }
       } else {
-        // Switch back to camera
         await screenSharingService.switchBackToCamera()
         setIsScreenSharing(false)
         screenSharingService.stopScreenShare()
@@ -399,29 +323,23 @@ const LiveStreamingComponent: FC<LiveStreamingProps> = ({ streamTitle, caseId, o
   }
 
   // Quality Change Handler
-  const handleQualityChange = async (quality: 'low' | 'medium' | 'high') => {
+  const handleQualityChange = (quality: 'low' | 'medium' | 'high') => {
     setCurrentQuality(quality)
     livestreamSocketService.sendStatusUpdate('active')
-    streamAnalyticsService.recordQualityChange(streamId || '', quality)
   }
 
   // Initialize camera and location
   useEffect(() => {
-    console.log('[Livestream] 🚀 Component mounted, initializing...')
     startCamera()
     getLocation()
-    console.log('[Livestream] ✅ Initialization complete')
 
     return () => {
-      // Cleanup on unmount
-      console.log('[Livestream] 🧹 Cleaning up...')
       if (streamRef.current) {
         streamRef.current.getTracks().forEach((track) => track.stop())
       }
       if (mediaRecorderRef.current && mediaRecorderRef.current.state !== 'inactive') {
         mediaRecorderRef.current.stop()
       }
-      setIsCameraReady(false)
     }
   }, [])
 
@@ -430,7 +348,6 @@ const LiveStreamingComponent: FC<LiveStreamingProps> = ({ streamTitle, caseId, o
     if (isStreaming) {
       qualityAdaptationService.startMonitoring((adaptedQuality) => {
         setCurrentQuality(adaptedQuality)
-        console.log(`Quality adapted to: ${adaptedQuality}`)
       })
 
       const statsInterval = setInterval(() => {
@@ -483,8 +400,8 @@ const LiveStreamingComponent: FC<LiveStreamingProps> = ({ streamTitle, caseId, o
           border-radius: 8px;
           overflow: hidden;
           width: 100%;
-          max-width: 820px;
-          height: clamp(200px, 40vh, 460px);
+          max-width: 600px;
+          height: 400px;
           margin: 0 auto;
         }
 
@@ -497,9 +414,10 @@ const LiveStreamingComponent: FC<LiveStreamingProps> = ({ streamTitle, caseId, o
 
         .jc-livestream-controls-bar {
           width: 100%;
-          max-width: 820px;
-          display: grid;
-          gap: 8px;
+          max-width: 600px;
+          display: flex;
+          flex-direction: column;
+          gap: 12px;
           margin: 0 auto;
         }
 
@@ -513,6 +431,7 @@ const LiveStreamingComponent: FC<LiveStreamingProps> = ({ streamTitle, caseId, o
           display: flex;
           justify-content: space-between;
           align-items: flex-start;
+          z-index: 10;
         }
 
         .jc-livestream-status {
@@ -523,7 +442,6 @@ const LiveStreamingComponent: FC<LiveStreamingProps> = ({ streamTitle, caseId, o
           padding: 10px 15px;
           border-radius: 20px;
           font-weight: bold;
-          z-index: 10;
         }
 
         .jc-livestream-status-dot {
@@ -566,7 +484,7 @@ const LiveStreamingComponent: FC<LiveStreamingProps> = ({ streamTitle, caseId, o
           flex-direction: column;
           gap: 15px;
           width: 100%;
-          max-width: 820px;
+          max-width: 600px;
         }
 
         .jc-livestream-title {
@@ -602,29 +520,23 @@ const LiveStreamingComponent: FC<LiveStreamingProps> = ({ streamTitle, caseId, o
           justify-content: center;
         }
 
-        .jc-livestream-info > .jc-livestream-controls {
-          display: none;
-        }
-
-        .jc-livestream-overlay-controls {
-          display: none;
-        }
-
         .jc-livestream-advanced {
           display: flex;
           gap: 10px;
           flex-wrap: wrap;
           align-items: center;
+          justify-content: center;
         }
 
         .jc-livestream-button {
-          padding: 10px 20px;
+          padding: 12px 24px;
           border: none;
           border-radius: 6px;
           font-weight: bold;
           cursor: pointer;
           transition: all 0.3s;
           font-size: 14px;
+          white-space: nowrap;
         }
 
         .jc-btn-live-start {
@@ -673,6 +585,7 @@ const LiveStreamingComponent: FC<LiveStreamingProps> = ({ streamTitle, caseId, o
         .jc-livestream-hint {
           font-size: 12px;
           color: #aaa;
+          text-align: center;
         }
 
         .jc-livestream-sidebar {
@@ -706,40 +619,24 @@ const LiveStreamingComponent: FC<LiveStreamingProps> = ({ streamTitle, caseId, o
           padding: 15px;
           border-radius: 8px;
           margin-bottom: 10px;
+          color: white;
         }
 
         @media (max-width: 768px) {
           .jc-livestream-container {
             grid-template-columns: 1fr;
-            height: auto;
             padding: 10px;
             gap: 10px;
           }
 
           .jc-livestream-video {
-            min-height: 250px;
-            aspect-ratio: 9 / 16;
-            height: auto;
             max-width: 100%;
-          }
-
-          .jc-livestream-sidebar {
-            order: 2;
-            display: flex;
+            height: 300px;
           }
 
           .jc-livestream-button {
-            padding: 8px 12px;
-            font-size: 12px;
-          }
-
-          .jc-livestream-info {
-            gap: 8px;
-          }
-
-          .jc-livestream-controls {
-            flex-direction: column;
-            align-items: stretch;
+            padding: 10px 16px;
+            font-size: 13px;
           }
 
           .jc-livestream-controls-bar {
@@ -748,12 +645,8 @@ const LiveStreamingComponent: FC<LiveStreamingProps> = ({ streamTitle, caseId, o
         }
 
         @media (max-width: 480px) {
-          .jc-livestream-container {
-            padding: 5px;
-          }
-
           .jc-livestream-video {
-            min-height: 200px;
+            height: 200px;
           }
 
           .jc-livestream-video video {
@@ -761,22 +654,49 @@ const LiveStreamingComponent: FC<LiveStreamingProps> = ({ streamTitle, caseId, o
           }
 
           .jc-livestream-button {
-            padding: 6px 10px;
-            font-size: 11px;
+            padding: 8px 12px;
+            font-size: 12px;
           }
 
-          .jc-livestream-title h2 {
-            font-size: 16px;
+          .jc-livestream-controls {
+            flex-direction: column;
+            width: 100%;
           }
 
-          .jc-livestream-viewers-number {
-            font-size: 24px;
+          .jc-livestream-controls .jc-livestream-button {
+            width: 100%;
           }
         }
       `}</style>
 
       <div className="jc-livestream-main">
         {error && <div className="jc-livestream-error">{error}</div>}
+
+        <div className="jc-livestream-video">
+          <video ref={videoRef} autoPlay playsInline muted />
+          {isStreaming && (
+            <div className="jc-livestream-header">
+              <div className="jc-livestream-status">
+                <span className="jc-livestream-status-dot" />
+                LIVE
+              </div>
+              <div className="jc-livestream-badges">
+                <div className="jc-livestream-badge">
+                  👥 {viewerCount} watching
+                </div>
+                {isRecording ? (
+                  <div className="jc-livestream-badge rec">
+                    ● Recording
+                  </div>
+                ) : (
+                  <div className="jc-livestream-badge">
+                    Recording off
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+        </div>
 
         <div className="jc-livestream-controls-bar">
           {isStreaming && (
@@ -789,7 +709,7 @@ const LiveStreamingComponent: FC<LiveStreamingProps> = ({ streamTitle, caseId, o
                 }}
                 title={isScreenSharing ? 'Stop screen sharing' : 'Start screen sharing'}
               >
-                {isScreenSharing ? 'âŠž Stop Screen' : 'âŠ¡ Share Screen'}
+                {isScreenSharing ? '⊟ Stop Screen' : '⊞ Share Screen'}
               </button>
               {!isMobile && (
                 <>
@@ -833,7 +753,7 @@ const LiveStreamingComponent: FC<LiveStreamingProps> = ({ streamTitle, caseId, o
                   onClick={handleStartStream}
                   disabled={isCreatingStream}
                 >
-                  {isCreatingStream ? 'Starting...' : 'â— Start Live Stream'}
+                  {isCreatingStream ? 'Starting...' : '● Start Live Stream'}
                 </button>
                 <button
                   className="jc-livestream-button jc-btn-record"
@@ -841,7 +761,7 @@ const LiveStreamingComponent: FC<LiveStreamingProps> = ({ streamTitle, caseId, o
                   disabled
                   title="Start the livestream first"
                 >
-                  âº Start Recording
+                  ⏺ Start Recording
                 </button>
                 <button className="jc-livestream-button jc-btn-live-back" onClick={onClose}>
                   Back
@@ -850,7 +770,7 @@ const LiveStreamingComponent: FC<LiveStreamingProps> = ({ streamTitle, caseId, o
             ) : (
               <>
                 <button className="jc-livestream-button jc-btn-live-stop" onClick={handleStopStream}>
-                  Stop Live Stream
+                  ⏹ Stop Live Stream
                 </button>
                 {!isRecording ? (
                   <button
@@ -858,11 +778,11 @@ const LiveStreamingComponent: FC<LiveStreamingProps> = ({ streamTitle, caseId, o
                     onClick={handleStartRecording}
                     disabled={!isCameraReady || streamStatus !== 'active'}
                   >
-                    âº Start Recording
+                    ⏺ Start Recording
                   </button>
                 ) : (
                   <button className="jc-livestream-button jc-btn-record" onClick={handleStopRecording}>
-                    â¹ Stop Recording
+                    ⏹ Stop Recording
                   </button>
                 )}
                 <button className="jc-livestream-button jc-btn-live-back" onClick={onClose}>
@@ -871,85 +791,9 @@ const LiveStreamingComponent: FC<LiveStreamingProps> = ({ streamTitle, caseId, o
               </>
             )}
           </div>
+
           {!isStreaming && (
             <span className="jc-livestream-hint">Start the livestream to enable recording.</span>
-          )}
-        </div>
-
-        <div className="jc-livestream-video">
-          <video ref={videoRef} autoPlay playsInline muted />
-          <div className="jc-livestream-overlay-controls">
-            <div className="jc-livestream-control-row">
-              {!isStreaming ? (
-                <>
-                  <button
-                    className="jc-livestream-button jc-btn-live-start"
-                    onClick={handleStartStream}
-                    disabled={isCreatingStream}
-                  >
-                    {isCreatingStream ? 'Starting...' : 'â— Start Live Stream'}
-                  </button>
-                  <button
-                    className="jc-livestream-button jc-btn-record"
-                    onClick={handleStartRecording}
-                    disabled
-                    title="Start the livestream first"
-                  >
-                    âº Start Recording
-                  </button>
-                  <button className="jc-livestream-button jc-btn-live-back" onClick={onClose}>
-                    Back
-                  </button>
-                </>
-              ) : (
-                <>
-                  <button className="jc-livestream-button jc-btn-live-stop" onClick={handleStopStream}>
-                    Stop Live Stream
-                  </button>
-                  {!isRecording ? (
-                    <button
-                      className="jc-livestream-button jc-btn-record"
-                      onClick={handleStartRecording}
-                      disabled={!isCameraReady || streamStatus !== 'active'}
-                    >
-                      âº Start Recording
-                    </button>
-                  ) : (
-                    <button className="jc-livestream-button jc-btn-record" onClick={handleStopRecording}>
-                      â¹ Stop Recording
-                    </button>
-                  )}
-                  <button className="jc-livestream-button jc-btn-live-back" onClick={onClose}>
-                    Back
-                  </button>
-                </>
-              )}
-            </div>
-            {!isStreaming && (
-              <span className="jc-livestream-hint">Start the livestream to enable recording.</span>
-            )}
-          </div>
-          {isStreaming && (
-            <div className="jc-livestream-header">
-              <div className="jc-livestream-status">
-                <span className="jc-livestream-status-dot" />
-                LIVE
-              </div>
-              <div className="jc-livestream-badges">
-                <div className="jc-livestream-badge">
-                  👥 {viewerCount} watching
-                </div>
-                {isRecording ? (
-                  <div className="jc-livestream-badge rec">
-                    ● Recording
-                  </div>
-                ) : (
-                  <div className="jc-livestream-badge">
-                    Recording off
-                  </div>
-                )}
-              </div>
-            </div>
           )}
         </div>
 
@@ -969,97 +813,8 @@ const LiveStreamingComponent: FC<LiveStreamingProps> = ({ streamTitle, caseId, o
             </div>
           )}
 
-          <div className="jc-livestream-controls">
-            {!isStreaming ? (
-              <>
-                <button
-                  className="jc-livestream-button jc-btn-live-start"
-                  onClick={handleStartStream}
-                  disabled={isCreatingStream}
-                >
-                  {isCreatingStream ? 'Starting...' : '● Start Live Stream'}
-                </button>
-                <button
-                  className="jc-livestream-button jc-btn-record"
-                  onClick={handleStartRecording}
-                  disabled
-                  title="Start the livestream first"
-                >
-                  ⏺ Start Recording
-                </button>
-                <span className="jc-livestream-hint">Start the livestream to enable recording.</span>
-                <button className="jc-livestream-button jc-btn-live-back" onClick={onClose}>
-                  Back
-                </button>
-              </>
-            ) : (
-              <>
-                <button className="jc-livestream-button jc-btn-live-stop" onClick={handleStopStream}>
-                  Stop Live Stream
-                </button>
-                {!isRecording ? (
-                  <button
-                    className="jc-livestream-button jc-btn-record"
-                    onClick={handleStartRecording}
-                    disabled={!isCameraReady || streamStatus !== 'active'}
-                  >
-                    ⏺ Start Recording
-                  </button>
-                ) : (
-                  <button className="jc-livestream-button jc-btn-record" onClick={handleStopRecording}>
-                    ⏹ Stop Recording
-                  </button>
-                )}
-                <button
-                  className="jc-livestream-button"
-                  onClick={handleScreenShare}
-                  style={{
-                    background: isScreenSharing ? '#2196F3' : '#333',
-                  }}
-                  title={isScreenSharing ? 'Stop screen sharing' : 'Start screen sharing'}
-                >
-                  {isScreenSharing ? '⊞ Stop Screen' : '⊡ Share Screen'}
-                </button>
-                <button className="jc-livestream-button jc-btn-live-back" onClick={onClose}>
-                  Back
-                </button>
-                {!isMobile && (
-                  <>
-                    <button
-                      className="jc-livestream-button"
-                      onClick={() => handleQualityChange('low')}
-                      style={{
-                        background: currentQuality === 'low' ? '#FF9800' : '#333',
-                      }}
-                    >
-                      480p
-                    </button>
-                    <button
-                      className="jc-livestream-button"
-                      onClick={() => handleQualityChange('medium')}
-                      style={{
-                        background: currentQuality === 'medium' ? '#FF9800' : '#333',
-                      }}
-                    >
-                      720p
-                    </button>
-                    <button
-                      className="jc-livestream-button"
-                      onClick={() => handleQualityChange('high')}
-                      style={{
-                        background: currentQuality === 'high' ? '#FF9800' : '#333',
-                      }}
-                    >
-                      1080p
-                    </button>
-                  </>
-                )}
-              </>
-            )}
-          </div>
-
           {networkStats && (
-            <div style={{ background: '#222', padding: '10px', borderRadius: '6px', fontSize: '12px', marginTop: '10px' }}>
+            <div style={{ background: '#222', padding: '10px', borderRadius: '6px', fontSize: '12px' }}>
               <div>🌐 Bandwidth: {(networkStats.bandwidth / 1000000).toFixed(1)} Mbps</div>
               <div>⏱ Latency: {networkStats.latency}ms</div>
               <div>📊 Packet Loss: {networkStats.packetLoss.toFixed(1)}%</div>
