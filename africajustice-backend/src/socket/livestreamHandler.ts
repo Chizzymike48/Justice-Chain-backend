@@ -40,22 +40,22 @@ export const setupLiveStreamHandler = (io: Server): void => {
         return next(new Error('Stream ID is required'))
       }
 
-      if (!token) {
-        return next(new Error('Authentication token is required'))
-      }
-
-      // Verify token and extract user
-      const decoded = verifyToken(token)
-      if (!decoded) {
-        return next(new Error('Invalid token'))
-      }
-
       const authSocket = socket as AuthSocket
-      authSocket.userId = decoded.id
       authSocket.streamId = streamId
+      if (token) {
+        // Verify token and extract user
+        const decoded = verifyToken(token)
+        if (!decoded) {
+          return next(new Error('Invalid token'))
+        }
+        authSocket.userId = decoded.id
+        console.log(`User ${decoded.id} joined stream ${streamId}`)
+      } else {
+        authSocket.userId = undefined
+        console.log(`Guest viewer joined stream ${streamId}`)
+      }
 
       // Log that user joined
-      console.log(`User ${decoded.id} joined stream ${streamId}`)
       next()
     } catch (error) {
       console.error('Livestream auth error:', error)
@@ -67,7 +67,7 @@ export const setupLiveStreamHandler = (io: Server): void => {
     const streamId = socket.streamId
     const userId = socket.userId
 
-    if (!streamId || !userId) {
+    if (!streamId) {
       socket.disconnect()
       return
     }
@@ -96,9 +96,14 @@ export const setupLiveStreamHandler = (io: Server): void => {
       totalViewers: livestreamService.getViewerCount(streamId),
     })
 
+    const isStreamer = !!userId && session.userId === userId
+
     // Handle stream chunks (from broadcaster)
     socket.on('stream-chunk', (data) => {
-      if (session.userId === userId && session.status === 'active') {
+      if (isStreamer) {
+        if (session.status !== 'active') {
+          livestreamService.updateStreamStatus(streamId, 'active')
+        }
         // Only the broadcaster can send stream chunks
         const chunkBuffer = coerceChunkBuffer(data)
         if (chunkBuffer) {
@@ -112,7 +117,7 @@ export const setupLiveStreamHandler = (io: Server): void => {
     socket.on('chat-message', async (message: { text: string; username?: string }) => {
       try {
         const chatMessage = {
-          userId,
+          userId: userId || 'guest',
           username: message.username || 'Anonymous',
           text: message.text,
           timestamp: new Date(),
@@ -131,7 +136,7 @@ export const setupLiveStreamHandler = (io: Server): void => {
 
     // Handle stream status updates
     socket.on('stream-status', async (data: { status: 'initializing' | 'active' | 'stopped' }) => {
-      if (session.userId === userId) {
+      if (isStreamer) {
         livestreamService.updateStreamStatus(streamId, (data.status === 'initializing' ? 'active' : data.status) as 'active' | 'stopped')
 
         // Update database
@@ -153,8 +158,8 @@ export const setupLiveStreamHandler = (io: Server): void => {
       livestreamService.removeViewer(streamId, socket as unknown as WebSocket)
 
       // If streamer disconnects, end the stream
-      if (session.userId === userId) {
-        livestreamService.updateStreamStatus(streamId, 'stopped')
+      if (isStreamer) {
+        livestreamService.endStreamSession(streamId)
         livestreamNamespace.to(`stream-${streamId}`).emit('stream-ended')
         console.log(`Streamer ${userId} disconnected from stream ${streamId}`)
       } else {

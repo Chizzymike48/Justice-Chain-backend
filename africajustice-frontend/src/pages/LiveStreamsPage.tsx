@@ -5,6 +5,7 @@ import { useAuth } from '../context/AuthContext'
 import livestreamService, { LiveStreamRecord } from '../services/livestreamService'
 import GoLiveButton from '../components/livestream/GoLiveButton'
 import LiveStreamingComponent from '../components/livestream/LiveStreamingComponent'
+import LiveChatComponent from '../components/livestream/LiveChat'
 
 const dateFormatter = new Intl.DateTimeFormat('en-NG', {
   dateStyle: 'medium',
@@ -125,6 +126,8 @@ const LiveStreamsPage: FC = () => {
 
   const featuredStream = activeStreams[0] ?? streams[0] ?? null
   const featuredEmbedUrl = featuredStream && featuredStream.streamUrl ? getEmbedUrl(featuredStream.streamUrl) : null
+  const featuredStreamId = featuredStream?.streamId
+  const isFeaturedLive = Boolean(featuredStreamId && (featuredStream?.status ?? 'active').toLowerCase() === 'active')
 
   const handleStartLiveStream = (streamData: { title: string; caseId?: string }) => {
     setLiveStreamTitle(streamData.title)
@@ -224,24 +227,28 @@ const LiveStreamsPage: FC = () => {
                 <p className="jc-muted">
                   {featuredStream.description || 'No additional description provided for this stream yet.'}
                 </p>
-                <div className="jc-form-actions">
-                  <a
-                    href={featuredStream.streamUrl}
-                    className="jc-btn jc-btn-primary"
-                    target="_blank"
-                    rel="noreferrer"
-                  >
-                    Watch live
-                  </a>
-                  <a
-                    href={featuredStream.streamUrl}
-                    className="jc-btn jc-btn-secondary"
-                    target="_blank"
-                    rel="noreferrer"
-                  >
-                    Open source link
-                  </a>
-                </div>
+                {featuredStream.streamUrl ? (
+                  <div className="jc-form-actions">
+                    <a
+                      href={featuredStream.streamUrl}
+                      className="jc-btn jc-btn-primary"
+                      target="_blank"
+                      rel="noreferrer"
+                    >
+                      Watch live
+                    </a>
+                    <a
+                      href={featuredStream.streamUrl}
+                      className="jc-btn jc-btn-secondary"
+                      target="_blank"
+                      rel="noreferrer"
+                    >
+                      Open source link
+                    </a>
+                  </div>
+                ) : (
+                  <p className="jc-muted">This is an in-app livestream. Join the live discussion to comment.</p>
+                )}
               </>
             ) : (
               <div className="jc-empty-state">
@@ -252,6 +259,14 @@ const LiveStreamsPage: FC = () => {
           </article>
 
           <aside className="jc-col-4 jc-sidebar-stack">
+            {isFeaturedLive && featuredStreamId ? (
+              <article className="jc-card">
+                <p className="jc-card-kicker">Live discussion</p>
+                <div style={{ height: '420px' }}>
+                  <LiveChatComponent streamId={featuredStreamId} />
+                </div>
+              </article>
+            ) : null}
             {isLoggedIn ? (
               <article id="livestream-create" className="jc-card jc-card--accent">
                 <p className="jc-card-kicker">Publish stream</p>
@@ -367,12 +382,18 @@ const LiveStreamsPage: FC = () => {
                   <p className="jc-muted">
                     {stream.description || 'No description provided. Open the stream link to view the broadcast.'}
                   </p>
-                  <p className="jc-muted" style={{ wordBreak: 'break-word' }}>
-                    {stream.streamUrl}
-                  </p>
-                  <a href={stream.streamUrl} className="jc-btn jc-btn-primary" target="_blank" rel="noreferrer">
-                    Watch stream
-                  </a>
+                  {stream.streamUrl ? (
+                    <>
+                      <p className="jc-muted" style={{ wordBreak: 'break-word' }}>
+                        {stream.streamUrl}
+                      </p>
+                      <a href={stream.streamUrl} className="jc-btn jc-btn-primary" target="_blank" rel="noreferrer">
+                        Watch stream
+                      </a>
+                    </>
+                  ) : (
+                    <p className="jc-muted">In-app livestream (no external URL).</p>
+                  )}
                 </article>
               ))}
             </div>

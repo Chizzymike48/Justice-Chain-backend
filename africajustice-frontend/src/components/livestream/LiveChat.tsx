@@ -38,7 +38,10 @@ const LiveChatComponent: FC<LiveChatProps> = ({ streamId, caseId }) => {
   // Initialize socket connection
   useEffect(() => {
     const socketOrigin = resolveSocketOrigin()
-    const socket = io(socketOrigin, {
+    const token = typeof window !== 'undefined' ? localStorage.getItem('authToken') : null
+    const socket = io(`${socketOrigin}/livestream`, {
+      auth: token ? { token } : undefined,
+      query: { streamId },
       reconnection: true,
       reconnectionDelay: 1000,
       reconnectionDelayMax: 5000,
@@ -47,13 +50,23 @@ const LiveChatComponent: FC<LiveChatProps> = ({ streamId, caseId }) => {
 
     socket.on('connect', () => {
       setIsConnected(true)
-      // Join stream room
-      const displayName = user?.name || user?.email || 'Anonymous'
-      socket.emit('livestream:join', { streamId, caseId, userId: user?.id, username: displayName })
     })
 
-    socket.on('livestream:message', (data: ChatMessage) => {
-      setMessages((prev) => [...prev, data])
+    socket.on('chat-message', (data: { userId?: string; username?: string; text?: string; message?: string; timestamp?: string | number }) => {
+      const rawTimestamp = data.timestamp
+      const timestamp = typeof rawTimestamp === 'string'
+        ? Date.parse(rawTimestamp)
+        : typeof rawTimestamp === 'number'
+          ? rawTimestamp
+          : Date.now()
+      const normalizedMessage: ChatMessage = {
+        id: `${timestamp}-${data.userId || data.username || 'guest'}`,
+        streamId,
+        username: data.username || 'Anonymous',
+        message: data.text || data.message || '',
+        timestamp,
+      }
+      setMessages((prev) => [...prev, normalizedMessage])
     })
 
     socket.on('disconnect', () => {
@@ -85,7 +98,7 @@ const LiveChatComponent: FC<LiveChatProps> = ({ streamId, caseId }) => {
       role: user?.role,
     }
 
-    socketRef.current.emit('livestream:message', message)
+    socketRef.current.emit('chat-message', { text: message.message, username: message.username })
     setInputValue('')
   }
 
