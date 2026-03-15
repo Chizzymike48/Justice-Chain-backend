@@ -38,17 +38,47 @@ const LiveStreamingComponent: FC<LiveStreamingProps> = ({ streamTitle, caseId, o
   const [networkStats, setNetworkStats] = useState<NetworkStats | null>(null)
   const [isMobile, setIsMobile] = useState(false)
 
-  // Start camera access
+  // Start camera access with better mobile/desktop support
   const startCamera = async () => {
     try {
       setError(null)
-      const stream = await navigator.mediaDevices.getUserMedia({
-        video: {
-          width: { ideal: 1280 },
-          height: { ideal: 720 },
-        },
-        audio: true,
-      })
+      console.log('[Livestream] 📷 Requesting camera access...')
+      
+      // Different constraints for mobile vs desktop
+      const isMobileDevice = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
+        navigator.userAgent
+      )
+      setIsMobile(isMobileDevice)
+      
+      let constraints: MediaStreamConstraints
+      
+      if (isMobileDevice) {
+        constraints = {
+          audio: true,
+          video: {
+            facingMode: 'environment', // Back camera on mobile
+            width: { ideal: 720 },
+            height: { ideal: 1280 },
+          },
+        }
+        console.log('[Livestream] 📱 Mobile device detected, using back camera')
+      } else {
+        // For desktop: try 1080p first, then fallback to 720p
+        constraints = {
+          audio: true,
+          video: {
+            width: { ideal: 1920, min: 640 },
+            height: { ideal: 1080, min: 480 },
+          },
+        }
+        console.log('[Livestream] 💻 Desktop device detected, requesting 1080p')
+      }
+
+      const stream = await navigator.mediaDevices.getUserMedia(constraints)
+      console.log('[Livestream] ✅ Camera access granted')
+      console.log('[Livestream] Device type:', isMobileDevice ? 'Mobile' : 'Desktop')
+      console.log('[Livestream] Video tracks:', stream.getVideoTracks().length)
+      console.log('[Livestream] Audio tracks:', stream.getAudioTracks().length)
 
       if (videoRef.current) {
         videoRef.current.srcObject = stream
@@ -56,19 +86,43 @@ const LiveStreamingComponent: FC<LiveStreamingProps> = ({ streamTitle, caseId, o
       }
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Failed to access camera'
-      setError(`Camera Error: ${errorMessage}`)
-      console.error('Camera access error:', err)
+      console.error('[Livestream] ❌ Camera access error:', err)
+      
+      // Provide helpful hints based on error type
+      let userFriendlyError = `Camera Error: ${errorMessage}`
+      
+      if (errorMessage.includes('Permission') || errorMessage.includes('denied')) {
+        userFriendlyError = '❌ Camera permission denied. Please:\n1. Check browser permissions\n2. Go to Settings → Privacy & Security\n3. Allow camera access for this site\n4. Refresh and try again'
+        console.warn('[Livestream] 💡 Hint: Camera permission denied - check browser settings')
+      } else if (errorMessage.includes('NotFound')) {
+        userFriendlyError = '❌ No camera found. Please:\n1. Check if camera is connected\n2. Close other apps using the camera\n3. Try a different USB port\n4. Restart your browser'
+        console.warn('[Livestream] 💡 Hint: No camera device found - check hardware')
+      } else if (errorMessage.includes('NotSupported')) {
+        userFriendlyError = '❌ Camera not supported. Please:\n1. Use Chrome, Firefox, or Edge\n2. Ensure site is using HTTPS (not HTTP)\n3. Update your browser'
+        console.warn('[Livestream] 💡 Hint: Camera not supported - try different browser or HTTPS')
+      } else if (errorMessage.includes('NotAllowed') || errorMessage.includes('PermissionDenied')) {
+        userFriendlyError = '❌ Permission denied. System blocked this app from accessing camera.\nTry: Settings → Privacy → Camera'
+        console.warn('[Livestream] 💡 Hint: System permission denied for camera')
+      } else if (errorMessage.includes('Timeout')) {
+        userFriendlyError = '❌ Camera access timeout. Try:\n1. Unplugging and re-plugging camera\n2. Restarting browser\n3. Checking device manager for errors'
+        console.warn('[Livestream] 💡 Hint: Camera timeout - may be hardware issue')
+      }
+      
+      setError(userFriendlyError)
     }
   }
 
-  // Get current location
+  // Get current location (non-blocking, optional feature)
   const getLocation = () => {
     if (!navigator.geolocation) {
-      setError('Geolocation is not supported by your browser')
+      console.warn('[Livestream] ⚠️ Geolocation not supported, continuing without location')
       return
     }
 
-    navigator.geolocation.watchPosition(
+    console.log('[Livestream] 📍 Requesting location...')
+    
+    // Use getCurrentPosition with longer timeout for better success rate
+    navigator.geolocation.getCurrentPosition(
       (position) => {
         setLocation({
           latitude: position.coords.latitude,
@@ -76,16 +130,18 @@ const LiveStreamingComponent: FC<LiveStreamingProps> = ({ streamTitle, caseId, o
           accuracy: position.coords.accuracy,
           timestamp: Date.now(),
         })
+        console.log('[Livestream] ✅ Location acquired:', position.coords.latitude, position.coords.longitude)
         setError(null)
       },
       (err) => {
-        console.error('Location error:', err)
-        setError(`Location Error: ${err.message}`)
+        // Don't block streaming if location fails - it's optional
+        console.warn('[Livestream] ⚠️ Location error (non-blocking):', err.message)
+        // Don't set error state - location is optional for streaming
       },
       {
-        enableHighAccuracy: true,
-        maximumAge: 0,
-        timeout: 5000,
+        enableHighAccuracy: false, // Less strict for faster response
+        maximumAge: 300000, // Use 5-minute cached location if available
+        timeout: 10000, // Longer timeout (10 seconds)
       },
     )
   }
@@ -129,18 +185,27 @@ const LiveStreamingComponent: FC<LiveStreamingProps> = ({ streamTitle, caseId, o
         onError: (error) => setError(error),
       })
 
-      // Wait a moment for socket to connect
-      setTimeout(() => {
+      // Wait for socket to actually connect with retry logic
+      let retries = 0
+      const maxRetries = 10
+      const connectionCheckInterval = setInterval(() => {
+        retries++
+        console.log(`[Livestream] Connection check ${retries}/${maxRetries}, connected: ${livestreamSocketService.isConnected()}`)
+        
         if (livestreamSocketService.isConnected()) {
+          clearInterval(connectionCheckInterval)
           setupMediaRecorder()
           livestreamSocketService.sendStatusUpdate('active')
           setStreamStatus('active')
           setIsStreaming(true)
-        } else {
-          setError('Failed to establish streaming connection')
+          console.log('[Livestream] ✅ Stream started successfully, recording active')
+        } else if (retries >= maxRetries) {
+          clearInterval(connectionCheckInterval)
+          setError('Failed to establish streaming connection after multiple attempts')
           setStreamStatus('stopped')
+          console.error('[Livestream] ❌ Connection failed after max retries')
         }
-      }, 500)
+      }, 300)
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Failed to start stream'
       setError(`Stream Error: ${errorMessage}`)
@@ -153,31 +218,52 @@ const LiveStreamingComponent: FC<LiveStreamingProps> = ({ streamTitle, caseId, o
 
   // Setup MediaRecorder to capture and send video chunks via Socket.io
   const setupMediaRecorder = () => {
-    if (!streamRef.current) return
+    if (!streamRef.current) {
+      console.error('[Livestream] ❌ No stream ref available')
+      setError('Stream not available for recording')
+      return
+    }
 
     try {
-      // Try multiple codec options for browser compatibility
+      console.log('[Livestream] 🎥 Initializing MediaRecorder...')
+      
+      // Try multiple codec options for maximum browser compatibility
       const codecOptions = [
+        'video/webm;codecs=vp9,opus',
         'video/webm;codecs=vp9',
+        'video/webm;codecs=vp8,opus',
         'video/webm;codecs=vp8',
+        'video/webm;codecs=h264,opus',
         'video/webm;codecs=h264',
         'video/webm',
+        'video/mp4',
       ]
       
       let selectedMimeType = ''
       for (const mimeType of codecOptions) {
         if (MediaRecorder.isTypeSupported(mimeType)) {
           selectedMimeType = mimeType
+          console.log(`[Livestream] ✅ Using codec: ${mimeType}`)
           break
         }
       }
 
+      if (!selectedMimeType) {
+        console.warn('[Livestream] ⚠️ No supported MIME type found, using default')
+      }
+
       const mediaRecorder = new MediaRecorder(streamRef.current, {
         mimeType: selectedMimeType || undefined,
+        audioBitsPerSecond: 128000,
+        videoBitsPerSecond: 2500000,
       })
 
+      let chunkCount = 0
       mediaRecorder.ondataavailable = (event) => {
         if (event.data.size > 0) {
+          chunkCount++
+          console.log(`[Livestream] 📤 Sending chunk ${chunkCount} (${(event.data.size / 1024).toFixed(2)} KB)`)
+          
           const reader = new FileReader()
           reader.onload = () => {
             livestreamSocketService.sendStreamChunk({
@@ -190,16 +276,25 @@ const LiveStreamingComponent: FC<LiveStreamingProps> = ({ streamTitle, caseId, o
         }
       }
 
+      mediaRecorder.onstart = () => {
+        console.log('[Livestream] ▶️ MediaRecorder started')
+      }
+
+      mediaRecorder.onstop = () => {
+        console.log(`[Livestream] ⏹️ MediaRecorder stopped (sent ${chunkCount} chunks)`)
+      }
+
       mediaRecorder.onerror = (event) => {
-        console.error('MediaRecorder error:', event.error)
+        console.error('[Livestream] ❌ MediaRecorder error:', event.error)
         setError(`Recording Error: ${event.error}`)
       }
 
       mediaRecorder.start(1000) // Send chunks every 1 second
       mediaRecorderRef.current = mediaRecorder
+      console.log('[Livestream] ✅ MediaRecorder setup complete')
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Failed to setup media recorder'
-      console.error('MediaRecorder setup error:', err)
+      console.error('[Livestream] ❌ MediaRecorder setup error:', err)
       setError(`Recording Error: ${errorMessage}`)
     }
   }
@@ -280,13 +375,19 @@ const LiveStreamingComponent: FC<LiveStreamingProps> = ({ streamTitle, caseId, o
 
   // Initialize camera and location
   useEffect(() => {
+    console.log('[Livestream] 🚀 Component mounted, initializing...')
     startCamera()
     getLocation()
+    console.log('[Livestream] ✅ Initialization complete')
 
     return () => {
       // Cleanup on unmount
+      console.log('[Livestream] 🧹 Cleaning up...')
       if (streamRef.current) {
         streamRef.current.getTracks().forEach((track) => track.stop())
+      }
+      if (mediaRecorderRef.current && mediaRecorderRef.current.state !== 'inactive') {
+        mediaRecorderRef.current.stop()
       }
     }
   }, [])
