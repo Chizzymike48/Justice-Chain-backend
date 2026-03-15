@@ -401,7 +401,7 @@ const LiveStreamingComponent: FC<LiveStreamingProps> = ({ streamTitle, caseId, o
           overflow: hidden;
           width: 100%;
           max-width: 480px;
-          height: 280px;
+          height: 240px;
           margin: 0 auto;
         }
 
@@ -673,32 +673,7 @@ const LiveStreamingComponent: FC<LiveStreamingProps> = ({ streamTitle, caseId, o
       <div className="jc-livestream-main">
         {error && <div className="jc-livestream-error">{error}</div>}
 
-        <div className="jc-livestream-video">
-          <video ref={videoRef} autoPlay playsInline muted />
-          {isStreaming && (
-            <div className="jc-livestream-header">
-              <div className="jc-livestream-status">
-                <span className="jc-livestream-status-dot" />
-                LIVE
-              </div>
-              <div className="jc-livestream-badges">
-                <div className="jc-livestream-badge">
-                  👥 {viewerCount} watching
-                </div>
-                {isRecording ? (
-                  <div className="jc-livestream-badge rec">
-                    ● Recording
-                  </div>
-                ) : (
-                  <div className="jc-livestream-badge">
-                    Recording off
-                  </div>
-                )}
-              </div>
-            </div>
-          )}
-        </div>
-
+        {/* BUTTONS FIRST - Always Visible */}
         <div className="jc-livestream-controls-bar">
           {isStreaming && (
             <div className="jc-livestream-advanced">
@@ -795,6 +770,33 @@ const LiveStreamingComponent: FC<LiveStreamingProps> = ({ streamTitle, caseId, o
 
           {!isStreaming && (
             <span className="jc-livestream-hint">Start the livestream to enable recording.</span>
+          )}
+        </div>
+
+        {/* VIDEO BELOW BUTTONS */}
+        <div className="jc-livestream-video">
+          <video ref={videoRef} autoPlay playsInline muted />
+          {isStreaming && (
+            <div className="jc-livestream-header">
+              <div className="jc-livestream-status">
+                <span className="jc-livestream-status-dot" />
+                LIVE
+              </div>
+              <div className="jc-livestream-badges">
+                <div className="jc-livestream-badge">
+                  👥 {viewerCount} watching
+                </div>
+                {isRecording ? (
+                  <div className="jc-livestream-badge rec">
+                    ● Recording
+                  </div>
+                ) : (
+                  <div className="jc-livestream-badge">
+                    Recording off
+                  </div>
+                )}
+              </div>
+            </div>
           )}
         </div>
 
