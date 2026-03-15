@@ -491,6 +491,29 @@ const LiveStreamingComponent: FC<LiveStreamingProps> = ({ streamTitle, caseId, o
           transform: scaleX(-1);
         }
 
+        .jc-livestream-overlay-controls {
+          position: absolute;
+          left: 16px;
+          right: 16px;
+          bottom: 16px;
+          display: flex;
+          flex-direction: column;
+          gap: 8px;
+          padding: 10px;
+          border-radius: 12px;
+          background: rgba(0, 0, 0, 0.55);
+          border: 1px solid rgba(255, 255, 255, 0.15);
+          backdrop-filter: blur(6px);
+          z-index: 12;
+        }
+
+        .jc-livestream-control-row {
+          display: flex;
+          gap: 10px;
+          flex-wrap: wrap;
+          align-items: center;
+        }
+
         .jc-livestream-header {
           position: absolute;
           top: 0;
@@ -581,6 +604,13 @@ const LiveStreamingComponent: FC<LiveStreamingProps> = ({ streamTitle, caseId, o
         }
 
         .jc-livestream-controls {
+          display: flex;
+          gap: 10px;
+          flex-wrap: wrap;
+          align-items: center;
+        }
+
+        .jc-livestream-advanced {
           display: flex;
           gap: 10px;
           flex-wrap: wrap;
@@ -702,12 +732,20 @@ const LiveStreamingComponent: FC<LiveStreamingProps> = ({ streamTitle, caseId, o
             font-size: 12px;
           }
 
-          .jc-livestream-controls {
-            flex-direction: column;
-          }
-
           .jc-livestream-info {
             gap: 8px;
+          }
+
+          .jc-livestream-overlay-controls {
+            left: 10px;
+            right: 10px;
+            bottom: 10px;
+            padding: 8px;
+          }
+
+          .jc-livestream-control-row {
+            flex-direction: column;
+            align-items: stretch;
           }
         }
 
@@ -744,6 +782,57 @@ const LiveStreamingComponent: FC<LiveStreamingProps> = ({ streamTitle, caseId, o
 
         <div className="jc-livestream-video">
           <video ref={videoRef} autoPlay playsInline muted />
+          <div className="jc-livestream-overlay-controls">
+            <div className="jc-livestream-control-row">
+              {!isStreaming ? (
+                <>
+                  <button
+                    className="jc-livestream-button jc-btn-live-start"
+                    onClick={handleStartStream}
+                    disabled={isCreatingStream}
+                  >
+                    {isCreatingStream ? 'Starting...' : 'â— Start Live Stream'}
+                  </button>
+                  <button
+                    className="jc-livestream-button jc-btn-record"
+                    onClick={handleStartRecording}
+                    disabled
+                    title="Start the livestream first"
+                  >
+                    âº Start Recording
+                  </button>
+                  <button className="jc-livestream-button jc-btn-live-back" onClick={onClose}>
+                    Back
+                  </button>
+                </>
+              ) : (
+                <>
+                  <button className="jc-livestream-button jc-btn-live-stop" onClick={handleStopStream}>
+                    Stop Live Stream
+                  </button>
+                  {!isRecording ? (
+                    <button
+                      className="jc-livestream-button jc-btn-record"
+                      onClick={handleStartRecording}
+                      disabled={!isCameraReady || streamStatus !== 'active'}
+                    >
+                      âº Start Recording
+                    </button>
+                  ) : (
+                    <button className="jc-livestream-button jc-btn-record" onClick={handleStopRecording}>
+                      â¹ Stop Recording
+                    </button>
+                  )}
+                  <button className="jc-livestream-button jc-btn-live-back" onClick={onClose}>
+                    Back
+                  </button>
+                </>
+              )}
+            </div>
+            {!isStreaming && (
+              <span className="jc-livestream-hint">Start the livestream to enable recording.</span>
+            )}
+          </div>
           {isStreaming && (
             <div className="jc-livestream-header">
               <div className="jc-livestream-status">
